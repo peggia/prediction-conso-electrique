@@ -9,7 +9,7 @@ from sklearn.metrics import mean_squared_error
 from datetime import datetime
 import matplotlib.pyplot as plt
 import seaborn as sns
-import statsmodels.api as sm
+
 
 # Charger les fichiers CSV
 df_conso_all = pd.read_csv('df_conso_all.csv', encoding='utf-8')

@@ -31,7 +31,7 @@ df_conso_all['MOIS'] = pd.to_datetime(df_conso_all['DATE']).dt.month
 df_conso_all['SAISON'] = df_conso_all['MOIS'].apply(nommer_saison)
 
 # Configuration de la page Streamlit avec une disposition large et un titre personnalisé
-st.set_page_config(page_title="Dashboard Énergétique", layout="wide", page_icon="🔋")
+st.set_page_config(page_title="Dashboard Énergétique", layout="wide", page_icon='logo PY²MN.png')
 
 # Ajout de style CSS personnalisé pour correspondre au thème Enedis
 st.markdown("""

@@ -99,7 +99,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Insertion du logo
-st.image('enedis-logo.png', width=120)
+st.image('enedis.png', width=120)
 
 # Titre principal de la page
 st.markdown("<h1>Tableau de bord énergétique - Enedis</h1>", unsafe_allow_html=True)

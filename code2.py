@@ -13,7 +13,7 @@ from sklearn.impute import SimpleImputer
 # Charger les fichiers CSV
 df_conso_all = pd.read_csv('df_conso_all.csv', encoding='utf-8')
 df_hf_cvl_full = pd.read_csv('df_hf_cvl_full.csv', encoding='utf-8')
-df_ML_RF = pd.read_csv('dfmlenedis.csv', encoding='utf-8')
+df = pd.read_csv('dfmlenedis.csv', encoding='utf-8')
 
 # Ajouter les colonnes "Saison" et "Mois" pour le nommage
 def nommer_saison(mois):
@@ -372,12 +372,7 @@ def make_prediction(model, scaler_X, input_data):
     input_data_scaled = scaler_X.transform(input_data)
     prediction = model.predict(input_data_scaled)
     return prediction
-
-
-# Charger les données
-data_enedis_path = 'https://raw.githubusercontent.com/NourBedoui/prediction-energie-/refs/heads/main/dfmlenedis.csv'
-df = pd.read_csv(data_enedis_path)
-
+    
 # Ajouter une colonne binaire pour les précipitations
 df['Pluie'] = np.where(df['Avg_Précipitations_24h'] > 0, 1, 0)
 

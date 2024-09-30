@@ -364,7 +364,7 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
         return model, scaler_X, X_train, X_test, y_train, y_test
     
     
-    def make_prediction(model, scaler_X, input_data):
+     def make_prediction(model, scaler_X, input_data):
         input_data_scaled = scaler_X.transform(input_data)
         prediction = model.predict(input_data_scaled)
         return prediction

@@ -335,7 +335,6 @@ elif section == "Section 2 : Visualisation consommation et météo":
                    color='REGION', title="Température maximale vs consommation avec régression linéaire")
     st.plotly_chart(fig25, use_container_width=True)
     st.markdown("**Utilité :** La régression linéaire ajoute une ligne de tendance qui montre la relation entre la température et la consommation.")
-
 # ---------------------------------------------------------------------------
 # Section 3 : Prédiction basée sur les données historiques avec Random Forest
 # ---------------------------------------------------------------------------
@@ -344,73 +343,75 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
 
     # Explication pour l'utilisateur
     st.markdown("""
-    ### COUCOU!!! Explication :
+    ### Explication :
     Cette section vous permet de prédire la consommation énergétique à partir de données historiques (température, précipitations, etc.) en utilisant un modèle d'apprentissage automatique de type Random Forest.
     """)
+
+    # Fonction pour entraîner le modèle
     def train_model(X, y):
         # Standardisation et imputation
         scaler_X = StandardScaler()
         imputer = SimpleImputer(strategy='mean')
         X_imputed = imputer.fit_transform(X)
         X_scaled = scaler_X.fit_transform(X_imputed)
-        
+
         # Séparation des données en ensembles d'entraînement et de test
         X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
-        
+
         # Entraînement du modèle
         model = RandomForestRegressor()
         model.fit(X_train, y_train)
-        
+
         return model, scaler_X, X_train, X_test, y_train, y_test
-    
-    
-     def make_prediction(model, scaler_X, input_data):
+
+    # Fonction pour faire des prédictions
+    def make_prediction(model, scaler_X, input_data):
         input_data_scaled = scaler_X.transform(input_data)
         prediction = model.predict(input_data_scaled)
         return prediction
-        
+
     # Ajouter une colonne binaire pour les précipitations
     df['Pluie'] = np.where(df['Avg_Précipitations_24h'] > 0, 1, 0)
-    
+
     # Variables d'entrée et cible
     X = df[['NB_POINTS_SOUTIRAGE', 'Avg_Temperature', 'Pluie', 'month']]
     y = df['ENERGIE_SOUTIREE']
-    
+
     # Entraînement du modèle
     model, scaler_X, X_train, X_test, y_train, y_test = train_model(X, y)
-    
+
     # Interface utilisateur Streamlit
     st.title("Enedis: Prédiction de l'Énergie")
-    
+
     # Sélection de la région
     regions = ['Auvergne-Rhône-Alpes', 'Bourgogne-Franche-Comté', 'Bretagne',
                'Centre-Val de Loire', 'Grand-Est', 'Hauts-de-France', 'Normandie',
                'Nouvelle Aquitaine', 'Occitanie', 'Pays de la Loire',
                "Provence-Alpes-Côte d'Azur", 'Île-de-France']
-    
+
     selected_region = st.selectbox('Sélectionnez une région', regions)
-    
+
     # Sélection de l'année et du mois
     years = list(range(2024, 2026))  # Plage d'années disponibles
     selected_year = st.selectbox('Sélectionnez une année', years)
     months = list(range(1, 13))
     selected_month = st.selectbox('Sélectionnez un mois', months)
-    
+
     # Entrées utilisateur pour la température et la longueur du jour
     feature_temperature = st.number_input('Entrez la température moyenne (°C)', value=0.0)
     feature_day_length = st.number_input("Entrez la longueur du jour (en heures)", value=12.0)
-    
+
     # Détermination de la pluie sur la base de l'entrée utilisateur pour les précipitations
     feature_precipitations = st.number_input('Entrez les précipitations moyennes sur 24h (mm)', value=0.0)
     feature_pluie = 1 if feature_precipitations > 0 else 0  # 1 si pluie, sinon 0
-    
+
     # Collecte des données d'entrée
     input_data = np.array([[1, feature_temperature, feature_pluie, selected_month]])  # 1 utilisé pour le nombre de points de soutirage par défaut
-    
+
     # Prédiction lorsqu'on clique sur le bouton
     if st.button("Prédire"):
         prediction = make_prediction(model, scaler_X, input_data)
-        
+
         # Affichage de la date future
         future_date = datetime(selected_year, selected_month, 1)  # On suppose le premier jour du mois
-        st.write(f"La prédiction pour la région {selected_region} le {future_date.strftime('%d %B %Y')} est : {prediction[0]} kWh")
+        st.write(f"La prédiction pour la région {selected_region} le {future_date.strftime('%d %B %Y')} est : {prediction[0]:.2f} kWh")

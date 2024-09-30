@@ -9,12 +9,11 @@ from sklearn.metrics import mean_squared_error
 from datetime import datetime
 import matplotlib.pyplot as plt
 import seaborn as sns
-
-
+from sklearn.impute import SimpleImputer
 # Charger les fichiers CSV
 df_conso_all = pd.read_csv('df_conso_all.csv', encoding='utf-8')
 df_hf_cvl_full = pd.read_csv('df_hf_cvl_full.csv', encoding='utf-8')
-df_ML_RF = pd.read_csv('df_ML_RF_minimalist.csv', encoding='utf-8')
+df_ML_RF = pd.read_csv('dfmlenedis.csv', encoding='utf-8')
 
 # Ajouter les colonnes "Saison" et "Mois" pour le nommage
 def nommer_saison(mois):
@@ -349,70 +348,78 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
     Cette section vous permet de prédire la consommation énergétique à partir de données historiques (température, précipitations, etc.) en utilisant un modèle d'apprentissage automatique de type Random Forest.
     """)
 
-    # Préparation des données pour la modélisation
-    features = ['Jour', 'Mois', 'MIN_TEMPERATURE_C', 'PRECIP_TOTAL_DAY_MM', 'REGION_Centre-Val de Loire', 'REGION_Hauts-de-France']
-    target = 'ENERGIE_SOUTIREE'
 
-    # Remplacer les valeurs NaN par la moyenne
-    df_ML_RF.fillna(df_ML_RF.mean(), inplace=True)
 
-    # Séparer les variables indépendantes (X) et la variable cible (y)
-    X = df_ML_RF[features]
-    y = df_ML_RF[target]
 
-    # Division des données en ensembles d'entraînement et de test
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-    # Mise à l'échelle des données
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_test_scaled = scaler.transform(X_test)
-
-    # Initialisation du modèle Random Forest
-    rf_model = RandomForestRegressor(n_estimators=100, random_state=42)
-
+def train_model(X, y):
+    # Standardisation et imputation
+    scaler_X = StandardScaler()
+    imputer = SimpleImputer(strategy='mean')
+    X_imputed = imputer.fit_transform(X)
+    X_scaled = scaler_X.fit_transform(X_imputed)
+    
+    # Séparation des données en ensembles d'entraînement et de test
+    X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+    
     # Entraînement du modèle
-    rf_model.fit(X_train_scaled, y_train)
+    model = RandomForestRegressor()
+    model.fit(X_train, y_train)
+    
+    return model, scaler_X, X_train, X_test, y_train, y_test
 
-    # Prédiction sur l'ensemble de test
-    y_pred = rf_model.predict(X_test_scaled)
 
-    # Évaluation du modèle
-    mse = mean_squared_error(y_test, y_pred)
-    st.write(f"**Erreur quadratique moyenne (MSE)** sur les données de test : {mse:.2f}")
+def make_prediction(model, scaler_X, input_data):
+    input_data_scaled = scaler_X.transform(input_data)
+    prediction = model.predict(input_data_scaled)
+    return prediction
 
-    # Interface utilisateur pour la prédiction
-    date_input = st.date_input("Choisissez une date")
-    region_input = st.selectbox("Sélectionnez la région", ['Centre-Val de Loire', 'Hauts-de-France'])
-    temp_min = st.number_input("Température minimum (°C)", value=5)
-    precip = st.number_input("Précipitations (mm)", value=1)
 
-    # Préparation des données pour la prédiction
-    if region_input == 'Centre-Val de Loire':
-        region_centre_val = 1
-        region_hauts_de_france = 0
-    else:
-        region_centre_val = 0
-        region_hauts_de_france = 1
+# Charger les données
+data_enedis_path = 'https://raw.githubusercontent.com/NourBedoui/prediction-energie-/refs/heads/main/dfmlenedis.csv'
+df = pd.read_csv(data_enedis_path)
 
-    # Récupération des valeurs du jour et du mois à partir de la date sélectionnée
-    jour = date_input.day
-    mois = date_input.month
+# Ajouter une colonne binaire pour les précipitations
+df['Pluie'] = np.where(df['Avg_Précipitations_24h'] > 0, 1, 0)
 
-    # Création d'un DataFrame pour les nouvelles données
-    input_data = pd.DataFrame({
-        'Jour': [jour],
-        'Mois': [mois],
-        'MIN_TEMPERATURE_C': [temp_min],
-        'PRECIP_TOTAL_DAY_MM': [precip],
-        'REGION_Centre-Val de Loire': [region_centre_val],
-        'REGION_Hauts-de-France': [region_hauts_de_france]
-    })
+# Variables d'entrée et cible
+X = df[['NB_POINTS_SOUTIRAGE', 'Avg_Temperature', 'Pluie', 'month']]
+y = df['ENERGIE_SOUTIREE']
 
-    # Mise à l'échelle des nouvelles données
-    input_scaled = scaler.transform(input_data)
+# Entraînement du modèle
+model, scaler_X, X_train, X_test, y_train, y_test = train_model(X, y)
 
-    # Prédiction de la consommation énergétique
-    if st.button('Prédire la consommation'):
-        prediction = rf_model.predict(input_scaled)
-        st.success(f"La consommation d'énergie prédite pour le {date_input} est de {prediction[0]:.2f} kWh")
+# Interface utilisateur Streamlit
+st.title("Enedis: Prédiction de l'Énergie")
+
+# Sélection de la région
+regions = ['Auvergne-Rhône-Alpes', 'Bourgogne-Franche-Comté', 'Bretagne',
+           'Centre-Val de Loire', 'Grand-Est', 'Hauts-de-France', 'Normandie',
+           'Nouvelle Aquitaine', 'Occitanie', 'Pays de la Loire',
+           "Provence-Alpes-Côte d'Azur", 'Île-de-France']
+
+selected_region = st.selectbox('Sélectionnez une région', regions)
+
+# Sélection de l'année et du mois
+years = list(range(2024, 2026))  # Plage d'années disponibles
+selected_year = st.selectbox('Sélectionnez une année', years)
+months = list(range(1, 13))
+selected_month = st.selectbox('Sélectionnez un mois', months)
+
+# Entrées utilisateur pour la température et la longueur du jour
+feature_temperature = st.number_input('Entrez la température moyenne (°C)', value=0.0)
+feature_day_length = st.number_input("Entrez la longueur du jour (en heures)", value=12.0)
+
+# Détermination de la pluie sur la base de l'entrée utilisateur pour les précipitations
+feature_precipitations = st.number_input('Entrez les précipitations moyennes sur 24h (mm)', value=0.0)
+feature_pluie = 1 if feature_precipitations > 0 else 0  # 1 si pluie, sinon 0
+
+# Collecte des données d'entrée
+input_data = np.array([[1, feature_temperature, feature_pluie, selected_month]])  # 1 utilisé pour le nombre de points de soutirage par défaut
+
+# Prédiction lorsqu'on clique sur le bouton
+if st.button("Prédire"):
+    prediction = make_prediction(model, scaler_X, input_data)
+    
+    # Affichage de la date future
+    future_date = datetime(selected_year, selected_month, 1)  # On suppose le premier jour du mois
+    st.write(f"La prédiction pour la région {selected_region} le {future_date.strftime('%d %B %Y')} est : {prediction[0]} kWh")

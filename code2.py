@@ -378,32 +378,26 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
     y = df['ENERGIE_SOUTIREE']
 
     # Entraînement du modèle
-    model, scaler_X, X_train, X_test, y_train, y_test = train_model(X, y)
+    model, scaler_X = train_model(X, y)
 
     # Interface utilisateur Streamlit
-    st.title("Enedis: Prédiction de l'Énergie")
+    st.title("Enedis: Prédiction de la consommation énergétique")
 
     # Sélection de la région
     regions = ['Auvergne-Rhône-Alpes', 'Bourgogne-Franche-Comté', 'Bretagne',
                'Centre-Val de Loire', 'Grand-Est', 'Hauts-de-France', 'Normandie',
                'Nouvelle Aquitaine', 'Occitanie', 'Pays de la Loire',
                "Provence-Alpes-Côte d'Azur", 'Île-de-France']
-
     selected_region = st.selectbox('Sélectionnez une région', regions)
 
-    # Sélection de l'année, du mois et du jour
-    years = list(range(2024, 2026))  # Plage d'années disponibles
-    selected_year = st.selectbox('Sélectionnez une année', years)
-    months = list(range(1, 13))
-    selected_month = st.selectbox('Sélectionnez un mois', months)
-    days = list(range(1, 32))
-    selected_day = st.selectbox('Sélectionnez un jour', days)
+    # Sélection de la date avec un calendrier
+    selected_date = st.date_input("Sélectionnez une date", min_value=datetime(2024, 1, 1), max_value=datetime(2025, 12, 31))
+    selected_year = selected_date.year
+    selected_month = selected_date.month
+    selected_day = selected_date.day
 
-    # Entrées utilisateur pour la température et la longueur du jour
+    # Entrées utilisateur pour la température et les précipitations
     feature_temperature = st.number_input('Entrez la température moyenne (°C)', value=0.0)
-    feature_day_length = st.number_input("Entrez la longueur du jour (en heures)", value=12.0)
-
-    # Détermination de la pluie sur la base de l'entrée utilisateur pour les précipitations
     feature_precipitations = st.number_input('Entrez les précipitations moyennes sur 24h (mm)', value=0.0)
     feature_pluie = 1 if feature_precipitations > 0 else 0  # 1 si pluie, sinon 0
 
@@ -414,21 +408,27 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
     if st.button("Prédire"):
         # Prédiction pour le jour spécifique
         prediction_day = make_prediction(model, scaler_X, input_data_day)
-        future_date = datetime(selected_year, selected_month, selected_day)
-        prediction_day_value = "{:.2E}".format(prediction_day[0])
+        future_date = selected_date
 
-        st.write(f"La prédiction pour la région {selected_region} le {future_date.strftime('%d %B %Y')} est : {prediction_day_value} kWh")
+        # Affichage de la prédiction en kWh et MWh
+        prediction_day_kwh = "{:.2E}".format(prediction_day[0])
+        prediction_day_mwh = "{:.2E}".format(prediction_day[0] / 1000)
+
+        st.write(f"La prédiction pour la région {selected_region} le {future_date.strftime('%d %B %Y')} est : {prediction_day_kwh} kWh")
+        st.write(f"La prédiction pour la région {selected_region} le {future_date.strftime('%d %B %Y')} est : {prediction_day_mwh} MWh")
 
         # Prédiction pour tout le mois
+        days_in_month = calendar.monthrange(selected_year, selected_month)[1]
         total_prediction_month = 0
-        for day in range(1, 32):  # Simule pour chaque jour du mois
-            try:
-                input_data_month = np.array([[1, feature_temperature, feature_pluie, day, selected_month]])
-                prediction_day_month = make_prediction(model, scaler_X, input_data_month)
-                total_prediction_month += prediction_day_month[0]
-            except:
-                pass  # Ignore les erreurs pour les jours inexistants dans certains mois (comme le 30 ou 31)
+        for day in range(1, days_in_month + 1):
+            input_data_month = np.array([[1, feature_temperature, feature_pluie, day, selected_month]])
+            prediction_day_month = make_prediction(model, scaler_X, input_data_month)
+            total_prediction_month += prediction_day_month[0]
 
         # Format de la consommation totale du mois
-        prediction_month_value = "{:.2E}".format(total_prediction_month)
-        st.write(f"La prédiction pour la consommation totale du mois de {future_date.strftime('%B %Y')} est : {prediction_month_value} kWh")
+        prediction_month_kwh = "{:.2E}".format(total_prediction_month)
+        prediction_month_mwh = "{:.2E}".format(total_prediction_month / 1000)
+
+        st.write(f"La prédiction pour la consommation totale du mois de {future_date.strftime('%B %Y')} est : {prediction_month_kwh} kWh")
+        st.write(f"La prédiction pour la consommation totale du mois de {future_date.strftime('%B %Y')} est : {prediction_month_mwh} MWh")
+

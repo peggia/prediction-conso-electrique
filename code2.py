@@ -374,7 +374,7 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
     df['Pluie'] = np.where(df['Avg_Précipitations_24h'] > 0, 1, 0)
 
     # Variables d'entrée et cible
-    X = df[['NB_POINTS_SOUTIRAGE', 'Avg_Temperature', 'Pluie', 'month']]
+    X = df[['NB_POINTS_SOUTIRAGE', 'Avg_Temperature', 'Pluie', 'day', 'month']]
     y = df['ENERGIE_SOUTIREE']
 
     # Entraînement du modèle
@@ -391,11 +391,13 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
 
     selected_region = st.selectbox('Sélectionnez une région', regions)
 
-    # Sélection de l'année et du mois
+    # Sélection de l'année, du mois et du jour
     years = list(range(2024, 2026))  # Plage d'années disponibles
     selected_year = st.selectbox('Sélectionnez une année', years)
     months = list(range(1, 13))
     selected_month = st.selectbox('Sélectionnez un mois', months)
+    days = list(range(1, 32))
+    selected_day = st.selectbox('Sélectionnez un jour', days)
 
     # Entrées utilisateur pour la température et la longueur du jour
     feature_temperature = st.number_input('Entrez la température moyenne (°C)', value=0.0)
@@ -405,17 +407,28 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
     feature_precipitations = st.number_input('Entrez les précipitations moyennes sur 24h (mm)', value=0.0)
     feature_pluie = 1 if feature_precipitations > 0 else 0  # 1 si pluie, sinon 0
 
-    # Collecte des données d'entrée
-    input_data = np.array([[1, feature_temperature, feature_pluie, selected_month]])  # 1 utilisé pour le nombre de points de soutirage par défaut
+    # Collecte des données d'entrée pour le jour sélectionné
+    input_data_day = np.array([[1, feature_temperature, feature_pluie, selected_day, selected_month]])
 
-# Prédiction lorsqu'on clique sur le bouton
-if st.button("Prédire"):
-    prediction = make_prediction(model, scaler_X, input_data)
-    
-    # Affichage de la date future
-    future_date = datetime(selected_year, selected_month, 1) 
-    
-    # Utilisation du formatage sans notation scientifique
-    prediction_value = "{:,.2f}".format(prediction[0])
-    prediction_MWh = prediction[0]/1000000 
-    st.write(f"La prédiction pour la région {selected_region} le {future_date.strftime('%d %B %Y')} est : {prediction_Mwh:.2E} MWh")
+    # Prédiction lorsqu'on clique sur le bouton
+    if st.button("Prédire"):
+        # Prédiction pour le jour spécifique
+        prediction_day = make_prediction(model, scaler_X, input_data_day)
+        future_date = datetime(selected_year, selected_month, selected_day)
+        prediction_day_value = "{:.2E}".format(prediction_day[0])
+
+        st.write(f"La prédiction pour la région {selected_region} le {future_date.strftime('%d %B %Y')} est : {prediction_day_value} kWh")
+
+        # Prédiction pour tout le mois
+        total_prediction_month = 0
+        for day in range(1, 32):  # Simule pour chaque jour du mois
+            try:
+                input_data_month = np.array([[1, feature_temperature, feature_pluie, day, selected_month]])
+                prediction_day_month = make_prediction(model, scaler_X, input_data_month)
+                total_prediction_month += prediction_day_month[0]
+            except:
+                pass  # Ignore les erreurs pour les jours inexistants dans certains mois (comme le 30 ou 31)
+
+        # Format de la consommation totale du mois
+        prediction_month_value = "{:.2E}".format(total_prediction_month)
+        st.write(f"La prédiction pour la consommation totale du mois de {future_date.strftime('%B %Y')} est : {prediction_month_value} kWh")

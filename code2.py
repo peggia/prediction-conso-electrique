@@ -397,7 +397,7 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
         selected_region = st.selectbox('Sélectionnez une région', regions)
 
         # Sélection de la date avec un calendrier
-        selected_date = st.date_input("Sélectionnez une date", min_value=datetime(2024, 1, 1), max_value=datetime(2025, 12, 31))
+        selected_date = st.date_input("Sélectionnez une date", min_value=datetime(2019, 1, 1), max_value=datetime(2039, 12, 31))
         selected_year = selected_date.year
         selected_month = selected_date.month
         selected_day = selected_date.day

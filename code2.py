@@ -408,10 +408,15 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
     # Collecte des données d'entrée
     input_data = np.array([[1, feature_temperature, feature_pluie, selected_month]])  # 1 utilisé pour le nombre de points de soutirage par défaut
 
-    # Prédiction lorsqu'on clique sur le bouton
-    if st.button("Prédire"):
-        prediction = make_prediction(model, scaler_X, input_data)
+# Prédiction lorsqu'on clique sur le bouton
+if st.button("Prédire"):
+    prediction = make_prediction(model, scaler_X, input_data)
+    
+    # Affichage de la date future
+    future_date = datetime(selected_year, selected_month, 1) 
+    
+    # Utilisation du formatage sans notation scientifique
+    prediction_value = "{:,.2f}".format(prediction[0])
+    
+    st.write(f"La prédiction pour la région {selected_region} le {future_date.strftime('%d %B %Y')} est : {prediction_value} kWh")
 
-        # Affichage de la date future
-        future_date = datetime(selected_year, selected_month, 1)  # On suppose le premier jour du mois
-        st.write(f"La prédiction pour la région {selected_region} le {future_date.strftime('%d %B %Y')} est : {prediction[0]:.2f} kWh")

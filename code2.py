@@ -417,6 +417,5 @@ if st.button("Prédire"):
     
     # Utilisation du formatage sans notation scientifique
     prediction_value = "{:,.2f}".format(prediction[0])
-    
-    st.write(f"La prédiction pour la région {selected_region} le {future_date.strftime('%d %B %Y')} est : {prediction_value} kWh")
-
+    prediction_MWh = prediction[0]/1000000 
+    st.write(f"La prédiction pour la région {selected_region} le {future_date.strftime('%d %B %Y')} est : {prediction_Mwh:.2E} MWh")

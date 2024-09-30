@@ -347,10 +347,6 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
     ### Explication :
     Cette section vous permet de prédire la consommation énergétique à partir de données historiques (température, précipitations, etc.) en utilisant un modèle d'apprentissage automatique de type Random Forest.
     """)
-
-
-
-
     def train_model(X, y):
         # Standardisation et imputation
         scaler_X = StandardScaler()

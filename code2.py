@@ -139,12 +139,34 @@ if section == "Section 1 : Visualisation de la consommation":
     """)
 
     # Visualisation 1 : Consommation par région
-    fig1 = px.bar(df_conso_all, x='REGION', y='ENERGIE_SOUTIREE', color='REGION',
+    #tri par ordre décroissant
+    df_conso_all_sorted = df_conso_all.sort_values(by='ENERGIE_SOUTIREE', ascending=False)
+    
+    fig1 = px.bar(df_conso_all_sorted, x='REGION', y='ENERGIE_SOUTIREE', color='REGION',
                   color_discrete_map=region_colors,
                   title="Consommation d'énergie par région")
     st.plotly_chart(fig1, use_container_width=True)
     st.markdown("**Utilité :** Ce graphique montre la répartition de la consommation d'énergie par région.")
+    
+    # Visualisation 2 : Nombre de points de soutirage par région
+    #tri par ordre décroissant
+    df_sorted_nb_points = df_conso_all.sort_values(by='NB_POINTS_SOUTIRAGE', ascending=False)
+    fig5 = px.bar(df_sorted_nb_points, x='REGION', y='NB_POINTS_SOUTIRAGE', color='REGION',
+                  color_discrete_map=region_colors,
+                  title="Nombre de points de soutirage par région")
+    st.plotly_chart(fig5, use_container_width=True)
+    st.markdown("**Utilité :** Il montre le nombre de points de soutirage par région, essentiel pour comprendre l'infrastructure.")
 
+     # Visualisation 3 : Consommation moyenne par région
+    df_conso_all['CONSO_PAR_REGION'] = df_conso_all['ENERGIE_SOUTIREE'] / df_conso_all['NB_POINTS_SOUTIRAGE']
+    #tri par ordre décroissant
+    df_sorted_conso_moyenne = df_conso_all.sort_values(by='CONSO_PAR_REGION', ascending=False)
+    fig6 = px.bar(df_conso_all, x='REGION', y='CONSO_PAR_REGION', color='REGION',
+                  color_discrete_sequence=px.colors.qualitative.Alphabet,
+                  title="Consommation par rapport au nombre de points soutirage par région")
+    st.plotly_chart(fig6, use_container_width=True)
+    st.markdown("**Utilité :** Ce graphique permet de comparer la consommation d'énergie par foyer selon les régions, et revèle les régions les plus énergivores.")
+    
     # # Visualisation 2 : Consommation par mois
     # fig2 = px.bar(df_conso_all, x='MOIS', y='ENERGIE_SOUTIREE', color='REGION',
     #               color_discrete_map=region_colors,
@@ -165,13 +187,6 @@ if section == "Section 1 : Visualisation de la consommation":
                   title="Répartition de la consommation par région")
     st.plotly_chart(fig4, use_container_width=True)
     st.markdown("**Utilité :** Ce graphique en secteur montre la part de chaque région dans la consommation totale.")
-
-    # Visualisation 5 : Nombre de points de soutirage par région
-    fig5 = px.bar(df_conso_all, x='REGION', y='NB_POINTS_SOUTIRAGE', color='REGION',
-                  color_discrete_map=region_colors,
-                  title="Nombre de points de soutirage par région")
-    st.plotly_chart(fig5, use_container_width=True)
-    st.markdown("**Utilité :** Il montre le nombre de points de soutirage par région, essentiel pour comprendre l'infrastructure.")
 
     # Carte interactive de la consommation d'énergie par région
     st.markdown("### Carte interactive de la consommation par région")
@@ -208,13 +223,7 @@ if section == "Section 1 : Visualisation de la consommation":
     fig_map.update_layout(mapbox_zoom=5, mapbox_center={"lat": 46.603354, "lon": 1.888334})  # Centrer sur la France
     st.plotly_chart(fig_map, use_container_width=True)
 
-    # Visualisation 6 : Consommation par région
-    df_conso_all['CONSO_PAR_REGION'] = df_conso_all['ENERGIE_SOUTIREE'] / df_conso_all['NB_POINTS_SOUTIRAGE']
-    fig6 = px.bar(df_conso_all, x='REGION', y='CONSO_PAR_REGION', color='REGION',
-                  color_discrete_sequence=px.colors.qualitative.Alphabet,
-                  title="Consommation par rapport au nombre de points soutirage par région")
-    st.plotly_chart(fig6, use_container_width=True)
-    st.markdown("**Utilité :** Ce graphique permet de comparer la consommation d'énergie par habitant selon les régions.")
+   
 
     # Visualisation 7 : Histogramme de la consommation d'énergie
     # fig7 = px.histogram(df_conso_all, x='ENERGIE_SOUTIREE', nbins=50, color='REGION',

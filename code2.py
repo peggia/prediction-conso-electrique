@@ -374,7 +374,7 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
     df['Pluie'] = np.where(df['Avg_Précipitations_24h'] > 0, 1, 0)
 
     # Variables d'entrée et cible
-    X = df[['NB_POINTS_SOUTIRAGE', 'Avg_Temperature', 'Pluie', 'day', 'month']]
+    X = df[['NB_POINTS_SOUTIRAGE', 'Avg_Temperature', 'Avg_Précipitations_24h', 'day', 'month']]
     y = df['ENERGIE_SOUTIREE']
 
     # Entraînement du modèle

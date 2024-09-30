@@ -380,7 +380,7 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
             return prediction
 
         # Variables d'entrée et cible
-        X = df[['NB_POINTS_SOUTIRAGE', 'Avg_Temperature', 'Pluie', 'day', 'month']]
+        X = df[['NB_POINTS_SOUTIRAGE','REGION', 'Avg_Temperature', 'Pluie', 'day', 'month']]
         y = df['ENERGIE_SOUTIREE']
 
         # Entraînement du modèle

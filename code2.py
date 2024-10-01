@@ -409,7 +409,7 @@ elif section == "Section 2 : Visualisation consommation et météo":
 # Section 3 : Prédiction basée sur les données historiques avec Random Forest
 # ---------------------------------------------------------------------------
 elif section == "Section 3 : Prédiction basée sur données historiques":
-     st.header("Section 3 : Prédiction de la consommation énergétique avec Random Forest")
+    st.header("Section 3 : Prédiction de la consommation énergétique avec Random Forest")
 
     # Explication pour l'utilisateur
     st.markdown("""

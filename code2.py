@@ -214,7 +214,7 @@ if section == "Section 1 : Visualisation de la consommation":
         'Île-de-France': [48.8566, 2.3522],
         'Grand-Est': [48.5734, 7.7521],
         'Normandie': [49.1829, -0.3707],
-        'Bretagne': [48.1173, -1.6778],  # Ici la longitude est corrigée
+        'Bretagne': [48.1173, -1.6778], 
         'Auvergne-Rhône-Alpes': [45.764, 4.8357],
         'Bourgogne-Franche-Comté': [47.2805, 5.9993],
         'Pays de la Loire': [47.2184, -1.5536],
@@ -320,6 +320,13 @@ elif section == "Section 2 : Visualisation consommation et météo":
                        color_discrete_map=region_colors, title="Consommation vs Précipitations")
     st.plotly_chart(fig12, use_container_width=True)
     st.markdown("**Utilité :** Ce graphique illustre l'impact des précipitations sur la consommation d'énergie.")
+
+    # Visualisation 3 : Longueur de la journée vs consommation
+    fig13 = px.scatter(df_all_regions, x='DayLength_hours', y='ENERGIE_SOUTIREE', color='REGION',
+                       color_discrete_map=region_colors, title="Consommation vs Longueur de la journée")
+    st.plotly_chart(fig13, use_container_width=True)
+    st.markdown("**Utilité :** Ce graphique illustre l'impact de la longueur d'une journée sur la consommation d'énergie.")
+
 
     # # Visualisation 3 : Humidité maximale vs consommation
     # fig13 = px.scatter(df_all_regions, x='HUMIDITY_MAX_PERCENT', y='ENERGIE_SOUTIREE', color='REGION',

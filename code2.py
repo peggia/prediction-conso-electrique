@@ -499,8 +499,8 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
             total_prediction_month += prediction_day_month[0]
 
         # Format de la consommation totale du mois
-        prediction_month_kwh = "{:.2f}".format(total_prediction_month)
-        prediction_month_mwh = "{:.2f}".format(total_prediction_month / 1000)
+        prediction_month_kwh = "{:.2E}".format(total_prediction_month)
+        prediction_month_mwh = "{:.2E}".format(total_prediction_month / 1000)
 
         st.write(f"La prédiction pour la consommation totale du mois de {future_date.strftime('%B %Y')} est : {prediction_month_kwh} kWh")
         st.write(f"La prédiction pour la consommation totale du mois de {future_date.strftime('%B %Y')} est : {prediction_month_mwh} MWh")

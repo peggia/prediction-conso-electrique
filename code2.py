@@ -139,12 +139,37 @@ if section == "Section 1 : Visualisation de la consommation":
     """)
 
     # Visualisation 1 : Consommation par région
-    fig1 = px.bar(df_conso_all, x='REGION', y='ENERGIE_SOUTIREE', color='REGION',
+    #tri par ordre décroissant
+    df_conso_region= df_conso_all.groupby(['REGION'])['ENERGIE_SOUTIREE'].sum().reset_index()
+    df_conso_all_sorted = df_conso_region.sort_values(by='ENERGIE_SOUTIREE', ascending=False)
+    
+    fig1 = px.bar(df_conso_all_sorted, x='REGION', y='ENERGIE_SOUTIREE', color='REGION',
                   color_discrete_map=region_colors,
                   title="Consommation d'énergie par région")
     st.plotly_chart(fig1, use_container_width=True)
     st.markdown("**Utilité :** Ce graphique montre la répartition de la consommation d'énergie par région.")
+    
+    # Visualisation 2 : Nombre de points de soutirage par région
+    #tri par ordre décroissant
+    df_sorted_nb_points = df_conso_all.sort_values(by='NB_POINTS_SOUTIRAGE', ascending=False)
+    fig5 = px.bar(df_sorted_nb_points, x='REGION', y='NB_POINTS_SOUTIRAGE', color='REGION',
+                  color_discrete_map=region_colors,
+                  title="Nombre de points de soutirage par région")
+    st.plotly_chart(fig5, use_container_width=True)
+    st.markdown("**Utilité :** Il montre le nombre de points de soutirage par région, essentiel pour comprendre l'infrastructure et la taille de la région en nombre de foyers (abonnements actifs).")
 
+     # Visualisation 3 : Consommation moyenne par région
+    df_conso_all['CONSO_MOYENNE'] = df_conso_all['ENERGIE_SOUTIREE'] / df_conso_all['NB_POINTS_SOUTIRAGE']
+    df_conso_moyenne= df_conso_all.groupby(['REGION','SAISON'])['CONSO_MOYENNE'].mean().reset_index()
+    #tri par ordre décroissant
+    df_conso_moyenne_sorted = df_conso_moyenne.sort_values(by='CONSO_MOYENNE', ascending=False)
+    fig6 = px.bar(df_conso_moyenne_sorted, x='REGION', y='CONSO_MOYENNE', color='REGION',
+                  color_discrete_sequence=px.colors.qualitative.Alphabet,
+                  title="Consommation moyenne par rapport au nombre de points soutirage par région")
+    st.plotly_chart(fig6, use_container_width=True)
+    st.markdown("**Utilité :** Ce graphique permet de comparer la consommation moyenne d'electricité par foyer dans chaque région, et revèle les régions les plus énergivores.")
+    
+  
     # # Visualisation 2 : Consommation par mois
     # fig2 = px.bar(df_conso_all, x='MOIS', y='ENERGIE_SOUTIREE', color='REGION',
     #               color_discrete_map=region_colors,
@@ -153,7 +178,10 @@ if section == "Section 1 : Visualisation de la consommation":
     # st.markdown("**Utilité :** Ce graphique illustre la consommation mensuelle d'énergie, permettant d'identifier les périodes de pic.")
 
     # Visualisation 3 : Consommation par saison (Box plot)
-    fig3 = px.box(df_conso_all, x='SAISON', y='ENERGIE_SOUTIREE', color='REGION',
+
+    #garder uniquement les années differentes de 2024 car elle est incomplète et fausse les résultats
+    df_conso_full = df_conso_all[~(df_conso_all['DATE'].str.contains('2024'))]
+    fig3 = px.box(df_conso_full, x='SAISON', y='ENERGIE_SOUTIREE', color='REGION',
                   color_discrete_map=region_colors,
                   title="Consommation par saison")
     st.plotly_chart(fig3, use_container_width=True)
@@ -165,13 +193,6 @@ if section == "Section 1 : Visualisation de la consommation":
                   title="Répartition de la consommation par région")
     st.plotly_chart(fig4, use_container_width=True)
     st.markdown("**Utilité :** Ce graphique en secteur montre la part de chaque région dans la consommation totale.")
-
-    # Visualisation 5 : Nombre de points de soutirage par région
-    fig5 = px.bar(df_conso_all, x='REGION', y='NB_POINTS_SOUTIRAGE', color='REGION',
-                  color_discrete_map=region_colors,
-                  title="Nombre de points de soutirage par région")
-    st.plotly_chart(fig5, use_container_width=True)
-    st.markdown("**Utilité :** Il montre le nombre de points de soutirage par région, essentiel pour comprendre l'infrastructure.")
 
     # Carte interactive de la consommation d'énergie par région
     st.markdown("### Carte interactive de la consommation par région")
@@ -208,13 +229,7 @@ if section == "Section 1 : Visualisation de la consommation":
     fig_map.update_layout(mapbox_zoom=5, mapbox_center={"lat": 46.603354, "lon": 1.888334})  # Centrer sur la France
     st.plotly_chart(fig_map, use_container_width=True)
 
-    # Visualisation 6 : Consommation par région
-    df_conso_all['CONSO_PAR_REGION'] = df_conso_all['ENERGIE_SOUTIREE'] / df_conso_all['NB_POINTS_SOUTIRAGE']
-    fig6 = px.bar(df_conso_all, x='REGION', y='CONSO_PAR_REGION', color='REGION',
-                  color_discrete_sequence=px.colors.qualitative.Alphabet,
-                  title="Consommation par rapport au nombre de points soutirage par région")
-    st.plotly_chart(fig6, use_container_width=True)
-    st.markdown("**Utilité :** Ce graphique permet de comparer la consommation d'énergie par habitant selon les régions.")
+   
 
     # Visualisation 7 : Histogramme de la consommation d'énergie
     # fig7 = px.histogram(df_conso_all, x='ENERGIE_SOUTIREE', nbins=50, color='REGION',
@@ -236,6 +251,8 @@ if section == "Section 1 : Visualisation de la consommation":
     st.plotly_chart(fig21, use_container_width=True)
     st.markdown("**Utilité :** Ce graphique montre l'évolution de la consommation d'énergie dans le temps, permettant de visualiser les tendances et les pics de consommation.")
     
+
+
     fig23 = px.treemap(df_conso_all, path=['SAISON', 'REGION'], values='ENERGIE_SOUTIREE',
                    color='ENERGIE_SOUTIREE', hover_data=['REGION'],
                    title="Treemap de la consommation d'énergie par région et saison",
@@ -243,6 +260,20 @@ if section == "Section 1 : Visualisation de la consommation":
     st.plotly_chart(fig23, use_container_width=True)
     st.markdown("**Utilité :** Le treemap montre la répartition de la consommation par région et par saison de manière hiérarchique.")
     
+   #Top 3 des régions qui consomment le plus d'énergie en moyenne par nombre de points de soutirage
+    # Obtenir le top 3 des régions pour chaque saison
+    df_top_3_regions = df_conso_moyenne.groupby('SAISON').apply(lambda x: x.nlargest(5, 'CONSO_MOYENNE')).reset_index(drop=True)
+    #ordonner par ordre décroissant
+    df_conso_top_3_regions = df_top_3_regions.sort_values(by='CONSO_MOYENNE', ascending=False)
+
+    fig24 = px.treemap(df_conso_top_3_regions, path=['SAISON', 'REGION'], values='CONSO_MOYENNE',
+                   color='CONSO_MOYENNE', hover_data=['REGION'],
+                   title="Treemap de la consommation moyenne par région et saison",
+                   color_continuous_scale='Viridis')
+    st.plotly_chart(fig24, use_container_width=True)
+    st.markdown("**Utilité :** Le treemap montre la répartition de la consommation moyenne par région et par saison de manière hiérarchique.")
+    
+   
     # df_cascade = df_conso_all.groupby('MOIS')['ENERGIE_SOUTIREE'].sum().reset_index()
     # df_cascade['Variation'] = df_cascade['ENERGIE_SOUTIREE'].diff().fillna(df_cascade['ENERGIE_SOUTIREE'])
     # fig24 = px.bar(df_cascade, x='MOIS', y='Variation', color='Variation',

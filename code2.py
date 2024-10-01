@@ -420,29 +420,7 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
 
     # Charger les fichiers CSV
     df = get_df_from_csv('dfmlenedis.csv')
-
-    # Sélection de la région
-    regions = ['Auvergne-Rhône-Alpes', 'Bourgogne-Franche-Comté', 'Bretagne',
-               'Centre-Val de Loire', 'Grand-Est', 'Hauts-de-France', 'Normandie',
-               'Nouvelle Aquitaine', 'Occitanie', 'Pays de la Loire',
-               "Provence-Alpes-Côte d'Azur", 'Île-de-France']
-    selected_region = st.selectbox('Sélectionnez une région', regions)
-
-    # Sélection de la date avec un calendrier
-    selected_date = st.date_input("Sélectionnez une date", min_value=datetime(2019, 1, 1), max_value=datetime(2039, 12, 31))
-    selected_year = selected_date.year
-    selected_month = selected_date.month
-    selected_day = selected_date.day
-
-    # Entrée pour la température et les précipitations (toujours visibles)
-    feature_temperature = st.number_input('Entrez la température moyenne (°C)', value=10.0)
-    feature_precipitations = st.number_input('Entrez les précipitations moyennes sur 24h (mm)', value=0.0)
-    feature_pluie = 1 if feature_precipitations > 0 else 0  # 1 si pluie, sinon 0
-
-    # Indépendamment des données historiques, on fait apparaître les champs
-    st.write("Ces champs sont toujours visibles pour toute date, qu'il y ait des données historiques ou non.")
-
-
+    ####### Fonctions
     def vacances(date,region):
         # définir le dico avec la liste des régions par zone: https://www.vacances-scolaires-education.fr/regions-zones-vacances-scolaires.html
         zone_A = ['Auvergne-Rhône-Alpes', 'Bourgogne-Franche-Comté', 'Nouvelle Aquitaine']
@@ -460,11 +438,12 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
 
         #récupérer les vacances pour la zone et la date
         d = SchoolHolidayDates()
-        # is_vacances = d.is_holiday_for_zone(date.date(), zone)
-        is_vacances = d.is_holiday_for_zone(date, zone)
+        is_vacances = d.is_holiday_for_zone(date.date(), zone)
+        #is_vacances = d.is_holiday_for_zone(date, zone)
         return is_vacances
     
     # Fonction pour entraîner le modèle (vous pouvez la compléter avec vos données historiques)
+    @st.cache_resource
     def init_model(X,y):
         # Standardisation des données
         scaler_X = StandardScaler()
@@ -491,24 +470,35 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
 
     # Fonction pour faire des prédictions
     def predict(model,X_scaler,date, region, temperature,precipitation):
-        ## Variables Calculées # ###
-        #verifier si c'est les vacances ce jour là
-        Vacances = vacances(date,region)
+        #st.write("Avant le if date, type",date,type(date))
+        if (date < datetime(2022,1,1)) or (date > datetime(2024,6,30)):
+            #st.write("Dans le if date en dehors")
+            ## Variables Calculées # ###
+            #verifier si c'est les vacances ce jour là
+            Vacances = vacances(date,region)
 
-        #Calculer la mediane de Day_Length, Avg_Temperature et Avg_Précipitations_24h pour le  jour et mois, les années passées
-        mask = (df['month'] == date.month) & (df['day'] == date.day)
-        DayLength_hours =  df.loc[mask, 'DayLength_hours'].median()
-        mask_region = (df['REGION'] == region)
-        nb_points_soutirage = df.loc[mask_region, 'NB_POINTS_SOUTIRAGE'].median()
-        # Contenu d'une observation X :
+            #Calculer la mediane de Day_Length, Avg_Temperature et Avg_Précipitations_24h pour le  jour et mois, les années passées
+            mask = (df['month'] == date.month) & (df['day'] == date.day)
+            DayLength_hours =  df.loc[mask, 'DayLength_hours'].median()
+            mask_region = (df['REGION'] == region)
+            nb_points_soutirage = df.loc[mask_region, 'NB_POINTS_SOUTIRAGE'].median()
+            # Contenu d'une observation X :
 
-        X_input = pd.DataFrame([[
-                                nb_points_soutirage, 
-                                temperature, precipitation,
-                                DayLength_hours,Vacances, date.day,date.month]],
-                                columns=['NB_POINTS_SOUTIRAGE', 'Avg_Temperature', 'Avg_Précipitations_24h', 
-                                        'DayLength_hours', 'Vacances', 'day', 'month']) 
-
+            X_input = pd.DataFrame([[
+                                    nb_points_soutirage, 
+                                    temperature, precipitation,
+                                    DayLength_hours,Vacances, date.day,date.month]],
+                                    columns=['NB_POINTS_SOUTIRAGE', 'Avg_Temperature', 'Avg_Précipitations_24h', 
+                                            'DayLength_hours', 'Vacances', 'day', 'month']) 
+        else:
+            #st.write("Dans le elif date connue")
+            #on recupere la ligne dans le df
+            # Filtrer les données du CSV pour la région et la date sélectionnées
+            mask = (df['REGION'] == region) & (df['year'] == date.year) & (df['month'] == date.month) & (df['day'] == date.day)
+            X_input = df.loc[mask,['NB_POINTS_SOUTIRAGE', 'Avg_Temperature', 'Avg_Précipitations_24h','DayLength_hours', 'Vacances', 'day', 'month']]
+            X_input['Avg_Temperature'] =temperature
+            X_input['Avg_Précipitations_24h'] =precipitation
+            
         #scaling de la nouvelle observation
         X_scaled = X_scaler.transform(X_input)
         # X_scaled = X_input
@@ -531,12 +521,31 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
                 
     #initialiser le modèle avec la fonction init_model(X,y)  définie avant et qui inclut le split train/test
     model,scaler,train_score,test_score = init_model(X,y)
-    # Entraînement du modèle
-    
+
+    ###########################
+
+    # Sélection de la région
+    regions = ['Auvergne-Rhône-Alpes', 'Bourgogne-Franche-Comté', 'Bretagne',
+               'Centre-Val de Loire', 'Grand-Est', 'Hauts-de-France', 'Normandie',
+               'Nouvelle Aquitaine', 'Occitanie', 'Pays de la Loire',
+               "Provence-Alpes-Côte d'Azur", 'Île-de-France']
+    selected_region = st.selectbox('Sélectionnez une région', regions)
+
+    # Sélection de la date avec un calendrier
+    selected_date = st.date_input("Sélectionnez une date", min_value=datetime(2019, 1, 1), max_value=datetime(2039, 12, 31))
+    selected_year = selected_date.year
+    selected_month = selected_date.month
+    selected_day = selected_date.day
+
+    feature_temperature = st.number_input('Entrez la température moyenne (°C)', value=10.0)
+    feature_precipitations = st.number_input('Entrez les précipitations moyennes sur 24h (mm)', value=0.0)
+    feature_pluie = 1 if feature_precipitations > 0 else 0  # 1 si pluie, sinon 0
+
     # Prédiction lorsqu'on clique sur le bouton
     if st.button("Prédire"):
         
-        future_date = selected_date
+        future_date = datetime(selected_year,selected_month,selected_day)
+        #st.write("future_date",future_date)
         prediction = predict(model, scaler,future_date,selected_region,feature_temperature,feature_precipitations)
 
         #on affiche

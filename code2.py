@@ -414,10 +414,10 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
     ### Explication :
     Cette section vous permet de prédire la consommation énergétique à partir de données historiques (température, précipitations, etc.) en utilisant un modèle d'apprentissage automatique de type Random Forest.
     """)
-        # Charger les fichiers CSV
-    # même df utilisé pour les volets 1 et 3, chargé avec la fonciton qui le met en cache
+
+    # Charger les fichiers CSV
     df = get_df_from_csv('dfmlenedis.csv')
-    
+
     # Vérifiez si la colonne 'Avg_Précipitations_24h' existe
     if 'Avg_Précipitations_24h' not in df.columns:
         st.write("'Avg_Précipitations_24h' colonne est manquante. Vérifiez vos données.")
@@ -473,38 +473,53 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
         selected_month = selected_date.month
         selected_day = selected_date.day
 
-        # Entrées utilisateur pour la température et les précipitations
-        feature_temperature = st.number_input('Entrez la température moyenne (°C)', value=0.0)
-        feature_precipitations = st.number_input('Entrez les précipitations moyennes sur 24h (mm)', value=0.0)
-        feature_pluie = 1 if feature_precipitations > 0 else 0  # 1 si pluie, sinon 0
+        # Filtrer les données du CSV pour la région et la date sélectionnées
+        df_filtered = df[(df['REGION'] == selected_region) & (df['year'] == selected_year) & (df['month'] == selected_month) & (df['day'] == selected_day)]
 
-        # Collecte des données d'entrée pour le jour sélectionné
-        input_data_day = np.array([[1, feature_temperature, feature_pluie, selected_day, selected_month]])
+        if df_filtered.empty:
+            st.write("Aucune donnée disponible pour cette combinaison de région et de date.")
+        else:
+            # Extraire les valeurs des variables depuis le CSV filtré
+            nb_points_soutirage = df_filtered['NB_POINTS_SOUTIRAGE'].values[0]
+            day_length = df_filtered['DayLength_hours'].values[0]
+            vacances = df_filtered['Vacances'].values[0]
 
-        # Prédiction lorsqu'on clique sur le bouton
-        if st.button("Prédire"):
-            # Prédiction pour le jour spécifique
-            prediction_day = make_prediction(model, scaler_X, input_data_day)
-            future_date = selected_date
+            # Entrées utilisateur pour la température et les précipitations
+            feature_temperature = st.number_input('Entrez la température moyenne (°C)', value=df_filtered['Avg_Temperature'].values[0])
+            feature_precipitations = st.number_input('Entrez les précipitations moyennes sur 24h (mm)', value=df_filtered['Avg_Précipitations_24h'].values[0])
+            feature_pluie = 1 if feature_precipitations > 0 else 0  # 1 si pluie, sinon 0
 
-            # Affichage de la prédiction en kWh et MWh
-            prediction_day_kwh = "{:.2E}".format(prediction_day[0])
-            prediction_day_mwh = "{:.2E}".format(prediction_day[0] / 1000)
+            # Collecte des données d'entrée pour le jour sélectionné
+            input_data_day = np.array([[nb_points_soutirage, feature_temperature, feature_precipitations, day_length, vacances, selected_day, selected_month]])
 
-            st.write(f"La prédiction pour la région {selected_region} le {future_date.strftime('%d %B %Y')} est : {prediction_day_kwh} kWh")
-            st.write(f"La prédiction pour la région {selected_region} le {future_date.strftime('%d %B %Y')} est : {prediction_day_mwh} MWh")
+            # Appliquer le scaler sur les données d'entrée
+            input_data_day_scaled = scaler_X.transform(input_data_day)
 
-            # Prédiction pour tout le mois
-            days_in_month = calendar.monthrange(selected_year, selected_month)[1]
-            total_prediction_month = 0
-            for day in range(1, days_in_month + 1):
-                input_data_month = np.array([[1, feature_temperature, feature_pluie, day, selected_month]])
-                prediction_day_month = make_prediction(model, scaler_X, input_data_month)
-                total_prediction_month += prediction_day_month[0]
+            # Prédiction lorsqu'on clique sur le bouton
+            if st.button("Prédire"):
+                prediction_day = make_prediction(model, scaler_X, input_data_day_scaled)
+                future_date = selected_date
 
-            # Format de la consommation totale du mois
-            prediction_month_kwh = "{:.2E}".format(total_prediction_month)
-            prediction_month_mwh = "{:.2E}".format(total_prediction_month / 1000)
+                # Affichage de la prédiction en kWh et MWh
+                prediction_day_kwh = "{:.2E}".format(prediction_day[0])
+                prediction_day_mwh = "{:.2E}".format(prediction_day[0] / 1000)
 
-            st.write(f"La prédiction pour la consommation totale du mois de {future_date.strftime('%B %Y')} est : {prediction_month_kwh} kWh")
-            st.write(f"La prédiction pour la consommation totale du mois de {future_date.strftime('%B %Y')} est : {prediction_month_mwh} MWh")
+                st.write(f"La prédiction pour la région {selected_region} le {future_date.strftime('%d %B %Y')} est : {prediction_day_kwh} kWh")
+                st.write(f"La prédiction pour la région {selected_region} le {future_date.strftime('%d %B %Y')} est : {prediction_day_mwh} MWh")
+
+                # Prédiction pour tout le mois
+                days_in_month = calendar.monthrange(selected_year, selected_month)[1]
+                total_prediction_month = 0
+                for day in range(1, days_in_month + 1):
+                    input_data_month = np.array([[nb_points_soutirage, feature_temperature, feature_precipitations, day_length, vacances, day, selected_month]])
+                    input_data_month_scaled = scaler_X.transform(input_data_month)
+                    prediction_day_month = make_prediction(model, scaler_X, input_data_month_scaled)
+                    total_prediction_month += prediction_day_month[0]
+
+                # Format de la consommation totale du mois
+                prediction_month_kwh = "{:.2E}".format(total_prediction_month)
+                prediction_month_mwh = "{:.2E}".format(total_prediction_month / 1000)
+
+                st.write(f"La prédiction pour la consommation totale du mois de {future_date.strftime('%B %Y')} est : {prediction_month_kwh} kWh")
+                st.write(f"La prédiction pour la consommation totale du mois de {future_date.strftime('%B %Y')} est : {prediction_month_mwh} MWh")
+

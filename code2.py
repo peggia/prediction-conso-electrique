@@ -214,7 +214,7 @@ if section == "Section 1 : Visualisation de la consommation":
         'Île-de-France': [48.8566, 2.3522],
         'Grand-Est': [48.5734, 7.7521],
         'Normandie': [49.1829, -0.3707],
-        'Bretagne': [48.1173, -1.6778],
+        'Bretagne': [48.1173, -1.6778],  # Ici la longitude est corrigée
         'Auvergne-Rhône-Alpes': [45.764, 4.8357],
         'Bourgogne-Franche-Comté': [47.2805, 5.9993],
         'Pays de la Loire': [47.2184, -1.5536],
@@ -222,6 +222,7 @@ if section == "Section 1 : Visualisation de la consommation":
         'Occitanie': [43.6045, 1.4442],
         'Corse': [42.0396, 9.0129]
     }
+
       # Ajouter les coordonnées au DataFrame
     df['LAT'] = df['REGION'].map(lambda x: geo_data[x][0] if x in geo_data else None)
     df['LON'] = df['REGION'].map(lambda x: geo_data[x][1] if x in geo_data else None)
@@ -417,126 +418,214 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
     Vous pouvez également faire des prédictions pour des dates futures ou pour des conditions hypothétiques.
     """)
 
-    # Charger les fichiers CSV
+    # Importations nécessaires
+    import datetime  # Importer le module datetime
+    from datetime import timedelta
+
+    # Charger le fichier CSV
     df = get_df_from_csv('dfmlenedis.csv')
-    
-# Fonction pour récupérer la température et les précipitations si la date est dans l'intervalle
+
+    ####### Fonctions
+
+    # Fonction pour déterminer si une date est pendant les vacances scolaires
+    def vacances(date, region):
+        # Définir les zones et les régions correspondantes
+        zone_A = ['Auvergne-Rhône-Alpes', 'Bourgogne-Franche-Comté', 'Nouvelle-Aquitaine']
+        zone_B = ['Bretagne', 'Centre-Val de Loire', 'Grand-Est', 'Hauts-de-France',
+                  'Normandie', 'Pays de la Loire', "Provence-Alpes-Côte d'Azur"]
+        zone_C = ['Occitanie', 'Île-de-France']
+
+        # Récupérer la zone de la région
+        if region in zone_A:
+            zone = 'A'
+        elif region in zone_B:
+            zone = 'B'
+        elif region in zone_C:
+            zone = 'C'
+        else:
+            raise ValueError(f"La région '{region}' n'appartient à aucune zone connue.")
+
+        # Récupérer les vacances pour la zone et la date
+        d = SchoolHolidayDates()
+        is_vacances = d.is_holiday_for_zone(date.date(), zone)
+        return int(is_vacances)
+
+    # Fonction pour récupérer la température et les précipitations si la date est dans l'intervalle
     def get_weather_data(df, date, region):
         mask = (df['REGION'] == region) & (df['year'] == date.year) & (df['month'] == date.month) & (df['day'] == date.day)
         weather_data = df.loc[mask, ['Avg_Temperature', 'Avg_Précipitations_24h']].squeeze()
         return weather_data
-    
+
     # Fonction de prédiction mise à jour avec remplissage automatique des données météo si la date est dans l'intervalle
     def predict(model, X_scaler, date, region, temperature=None, precipitation=None):
         if isinstance(date, datetime.date):
-            date = datetime.combine(date, datetime.min.time())
-    
-        if (date < datetime(2022, 1, 1)) or (date > datetime(2024, 6, 30)):
+            date = datetime.datetime.combine(date, datetime.datetime.min.time())
+
+        if (date < datetime.datetime(2022, 1, 1)) or (date > datetime.datetime(2024, 6, 30)):
             # Prédiction pour les dates hors de la plage définie
             Vacances = vacances(date, region)
             mask = (df['month'] == date.month) & (df['day'] == date.day)
             DayLength_hours = df.loc[mask, 'DayLength_hours'].median()
             mask_region = (df['REGION'] == region)
             nb_points_soutirage = df.loc[mask_region, 'NB_POINTS_SOUTIRAGE'].median()
-            
+
             X_input = pd.DataFrame([[nb_points_soutirage, temperature, precipitation, DayLength_hours, Vacances, date.day, date.month]],
-                                   columns=['NB_POINTS_SOUTIRAGE', 'Avg_Temperature', 'Avg_Précipitations_24h', 
+                                   columns=['NB_POINTS_SOUTIRAGE', 'Avg_Temperature', 'Avg_Précipitations_24h',
                                             'DayLength_hours', 'Vacances', 'day', 'month'])
         else:
             # Prédiction avec les données du CSV
             weather_data = get_weather_data(df, date, region)
             if weather_data.empty:
-                st.error("Aucune donnée disponible pour la date et la région sélectionnées.")
+                st.error("Aucune donnée météo disponible pour la date et la région sélectionnées.")
                 return None
-    
-            X_input = df.loc[(df['REGION'] == region) & (df['year'] == date.year) & (df['month'] == date.month) & (df['day'] == date.day), 
-                             ['NB_POINTS_SOUTIRAGE', 'Avg_Temperature', 'Avg_Précipitations_24h', 
-                              'DayLength_hours', 'Vacances', 'day', 'month']]
-    
-            if X_input.empty:
-                st.error("Aucune donnée disponible pour la date et la région sélectionnées.")
-                return None
-    
+
+            temperature = weather_data['Avg_Temperature']
+            precipitation = weather_data['Avg_Précipitations_24h']
+
+            Vacances = vacances(date, region)
+            DayLength_hours = df.loc[(df['month'] == date.month) & (df['day'] == date.day), 'DayLength_hours'].median()
+            nb_points_soutirage = df.loc[df['REGION'] == region, 'NB_POINTS_SOUTIRAGE'].median()
+
+            X_input = pd.DataFrame([[nb_points_soutirage, temperature, precipitation, DayLength_hours, Vacances, date.day, date.month]],
+                                   columns=['NB_POINTS_SOUTIRAGE', 'Avg_Temperature', 'Avg_Précipitations_24h',
+                                            'DayLength_hours', 'Vacances', 'day', 'month'])
+
         X_scaled = X_scaler.transform(X_input)
         prediction = model.predict(X_scaled)
-    
+
         return prediction
-    
+
     # Ajouter une visualisation en courbe pour le mois entier
     def visualize_month(df, model, X_scaler, month, year, region):
-        days_in_month = (datetime(year, month, 28) + timedelta(days=4)).day
-        dates = [datetime(year, month, day) for day in range(1, days_in_month + 1)]
+        from calendar import monthrange
+        days_in_month = monthrange(year, month)[1]
+        dates = [datetime.datetime(year, month, day) for day in range(1, days_in_month + 1)]
         predictions = []
         for date in dates:
             prediction = predict(model, X_scaler, date, region)
-            if prediction:
+            if prediction is not None:
                 predictions.append(prediction[0])
-    
-        fig = px.line(x=dates, y=predictions, title=f"Prédiction de la consommation pour {month}/{year}")
+            else:
+                predictions.append(None)
+
+        fig = px.line(x=dates, y=predictions, title=f"Prédiction de la consommation pour {month}/{year}", labels={'x': 'Date', 'y': 'Consommation (Wh)'})
         st.plotly_chart(fig, use_container_width=True)
-    
-    # Ajouter une visualisation journalière par heure
-    def visualize_day_hours(df, model, X_scaler, date, region):
-        hours = [f'{i}:00' for i in range(24)]
-        predictions = []
-        for hour in range(24):
-            # On peut ajuster les prédictions horaires, ici c'est une approximation basée sur la longueur du jour
-            day_length_factor = (hour / 24)
-            prediction = predict(model, X_scaler, date, region)
-            if prediction:
-                predictions.append(prediction[0] * day_length_factor)
-    
-        fig = px.line(x=hours, y=predictions, title=f"Prédiction horaire pour le {date.strftime('%d/%m/%Y')}")
-        st.plotly_chart(fig, use_container_width=True)
-    
+
+    # # Ajouter une visualisation journalière par heure
+    # def visualize_day_hours(df, model, X_scaler, date, region):
+    #     hours = [f'{i}:00' for i in range(24)]
+    #     predictions = []
+    #     base_prediction = predict(model, X_scaler, date, region)
+    #     if base_prediction is None:
+    #         st.error("Impossible de générer la prédiction horaire.")
+    #         return
+
+    #     total_consumption = base_prediction[0]
+    #     # Distribution simplifiée de la consommation sur 24 heures
+    #     hourly_consumption = total_consumption / 24
+    #     predictions = [hourly_consumption for _ in range(24)]
+
+    #     fig = px.line(x=hours, y=predictions, title=f"Prédiction horaire pour le {date.strftime('%d/%m/%Y')}", labels={'x': 'Heure', 'y': 'Consommation (Wh)'})
+    #     st.plotly_chart(fig, use_container_width=True)
+
     # Visualisation des prédictions pour l'année entière
     def visualize_year(df, model, X_scaler, year, region):
         months = range(1, 13)
         predictions = []
         for month in months:
-            prediction = predict(model, X_scaler, datetime(year, month, 15), region)
-            if prediction:
+            date = datetime.datetime(year, month, 15)
+            prediction = predict(model, X_scaler, date, region)
+            if prediction is not None:
                 predictions.append(prediction[0])
-    
-        fig = px.bar(x=months, y=predictions, title=f"Prédiction de la consommation pour l'année {year}")
+            else:
+                predictions.append(None)
+
+        fig = px.bar(x=list(months), y=predictions, title=f"Prédiction de la consommation pour l'année {year}", labels={'x': 'Mois', 'y': 'Consommation (Wh)'})
         st.plotly_chart(fig, use_container_width=True)
-    
-    # Charger les fichiers CSV
-    df = get_df_from_csv('dfmlenedis.csv')
-    
+
+    # Fonction pour entraîner le modèle Random Forest avec les données historiques
+    def init_model(df):
+        # Colonnes à utiliser pour les prédictions
+        features = ['NB_POINTS_SOUTIRAGE', 'Avg_Temperature', 'Avg_Précipitations_24h',
+                    'DayLength_hours', 'Vacances', 'day', 'month']
+        X = df[features]
+        y = df['ENERGIE_SOUTIREE']
+
+        # Gérer les valeurs manquantes
+        imputer = SimpleImputer(strategy='mean')
+        X_imputed = imputer.fit_transform(X)
+
+        # Normaliser les données
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X_imputed)
+
+        # Diviser les données en train et test
+        X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+
+        # Créer le modèle Random Forest
+        model = RandomForestRegressor(n_estimators=100, random_state=42)
+        model.fit(X_train, y_train)
+
+        # Évaluer le modèle
+        train_score = model.score(X_train, y_train)
+        test_score = model.score(X_test, y_test)
+        st.write(f"Score du modèle sur les données d'entraînement: {train_score:.2f}")
+        st.write(f"Score du modèle sur les données de test: {test_score:.2f}")
+
+        return model, scaler
+
+    # Initialisation du modèle et du scaler
+    model, scaler = init_model(df)
+
     # Interface utilisateur pour la sélection de la région, de la date et des entrées météorologiques
     regions = ['Auvergne-Rhône-Alpes', 'Bourgogne-Franche-Comté', 'Bretagne',
                'Centre-Val de Loire', 'Grand-Est', 'Hauts-de-France', 'Normandie',
                'Nouvelle-Aquitaine', 'Occitanie', 'Pays de la Loire',
                "Provence-Alpes-Côte d'Azur", 'Île-de-France']
     selected_region = st.selectbox('Sélectionnez une région', regions)
-    
-    selected_date = st.date_input("Sélectionnez une date", min_value=datetime(2019, 1, 1).date(), max_value=datetime(2039, 12, 31).date())
-    feature_temperature = st.number_input('Température moyenne (°C)', value=10.0)
-    feature_precipitations = st.number_input('Précipitations (mm)', value=0.0)
-    
+
+    selected_date = st.date_input("Sélectionnez une date", min_value=datetime.date(2019, 1, 1), max_value=datetime.date(2039, 12, 31))
+
+    # Initialisation des variables
+    feature_temperature = None
+    feature_precipitations = None
+
     # Vérifier si la date est dans la plage et remplir automatiquement les données météo
-    if datetime(2022, 1, 1) <= selected_date <= datetime(2024, 6, 30):
-        weather_data = get_weather_data(df, selected_date, selected_region)
+    if isinstance(selected_date, datetime.date):
+        future_date = datetime.datetime.combine(selected_date, datetime.datetime.min.time())
+    else:
+        future_date = selected_date
+
+    if datetime.datetime(2022, 1, 1) <= future_date <= datetime.datetime(2024, 6, 30):
+        weather_data = get_weather_data(df, future_date, selected_region)
         if not weather_data.empty:
             feature_temperature = weather_data['Avg_Temperature']
             feature_precipitations = weather_data['Avg_Précipitations_24h']
             st.write(f"Température et précipitations automatiques pour cette date : {feature_temperature}°C, {feature_precipitations} mm")
-    
-    # Prédiction lorsque l'utilisateur appuie sur le bouton
+        else:
+            st.warning("Données météo indisponibles pour cette date. Veuillez entrer manuellement les valeurs.")
+            feature_temperature = st.number_input('Température moyenne (°C)', value=10.0)
+            feature_precipitations = st.number_input('Précipitations (mm)', value=0.0)
+    else:
+        st.info("Veuillez entrer les données météo pour la prédiction.")
+        feature_temperature = st.number_input('Température moyenne (°C)', value=10.0)
+        feature_precipitations = st.number_input('Précipitations (mm)', value=0.0)
+
+    # Bouton de prédiction
     if st.button("Prédire"):
-        future_date = datetime.combine(selected_date, datetime.min.time())
         prediction = predict(model, scaler, future_date, selected_region, feature_temperature, feature_precipitations)
-    
+
         if prediction is not None:
             prediction_Mwh = prediction[0] / 1_000_000
-            st.write(f"Prédiction de consommation : {int(prediction_Mwh)} MWh pour la date {future_date.strftime('%d/%m/%Y')}.")
-    
+            st.success(f"Prédiction de consommation : {int(prediction_Mwh)} MWh pour la date {future_date.strftime('%d/%m/%Y')}.")
+
             # Visualisation pour le mois
-            visualize_month(df, model, scaler, selected_date.month, selected_date.year, selected_region)
-    
+            visualize_month(df, model, scaler, future_date.month, future_date.year, selected_region)
+
             # Visualisation journalière
-            visualize_day_hours(df, model, scaler, future_date, selected_region)
-    
+            #visualize_day_hours(df, model, scaler, future_date, selected_region)
+
             # Visualisation pour l'année
-            visualize_year(df, model, scaler, selected_date.year, selected_region)
+            visualize_year(df, model, scaler, future_date.year, selected_region)
+        else:
+            st.error("La prédiction n'a pas pu être effectuée.")

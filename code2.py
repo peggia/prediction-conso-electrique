@@ -466,41 +466,27 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
     # Entraînement du modèle
     model, scaler_X = train_model(X, y)
 
-    # Collecte des données d'entrée pour le jour sélectionné (toujours pris en compte)
-    nb_points_soutirage = 100  # Valeur par défaut ou à récupérer selon les données historiques
-    day_length = 12  # Valeur fictive pour exemple, à ajuster selon vos besoins
-    vacances = 0  # Valeur fictive pour les vacances, à ajuster
+  
+ # Collecte des données d'entrée pour le jour sélectionné
+# Assurez-vous que le nombre de colonnes dans 'input_data_day' correspond à celui utilisé lors de l'entraînement
+input_data_day = np.array([[1, feature_temperature, feature_pluie, selected_day, selected_month]])
 
-    input_data_day = np.array([[nb_points_soutirage, feature_temperature, feature_precipitations, day_length, vacances, selected_day, selected_month]])
+# Vérifiez le nombre de colonnes dans 'X' lors de l'entraînement
+st.write(f"Nombre de caractéristiques utilisées lors de l'entraînement : {X.shape[1]}")
+st.write(f"Nombre de caractéristiques fournies pour la prédiction : {input_data_day.shape[1]}")
 
-    # Appliquer le scaler sur les données d'entrée
-    input_data_day_scaled = scaler_X.transform(input_data_day)
-
-    # Prédiction lorsqu'on clique sur le bouton
-    if st.button("Prédire"):
-        prediction_day = make_prediction(model, scaler_X, input_data_day_scaled)
+# Prédiction lorsqu'on clique sur le bouton
+if st.button("Prédire"):
+    # Assurez-vous que 'input_data_day' a le bon nombre de colonnes
+    if input_data_day.shape[1] == X.shape[1]:
+        prediction_day = make_prediction(model, scaler_X, input_data_day)
         future_date = selected_date
 
         # Affichage de la prédiction en kWh et MWh
-        prediction_day_kwh = "{:.2f}".format(prediction_day[0])
-        prediction_day_mwh = "{:.2f}".format(prediction_day[0] / 1000)
+        prediction_day_kwh = "{:.2E}".format(prediction_day[0])
+        prediction_day_mwh = "{:.2E}".format(prediction_day[0] / 1000)
 
         st.write(f"La prédiction pour la région {selected_region} le {future_date.strftime('%d %B %Y')} est : {prediction_day_kwh} kWh")
         st.write(f"La prédiction pour la région {selected_region} le {future_date.strftime('%d %B %Y')} est : {prediction_day_mwh} MWh")
-
-        # Prédiction pour tout le mois (facultatif, selon vos besoins)
-        total_prediction_month = 0
-        days_in_month = calendar.monthrange(selected_year, selected_month)[1]
-
-        for day in range(1, days_in_month + 1):
-            input_data_month = np.array([[nb_points_soutirage, feature_temperature, feature_precipitations, day_length, vacances, day, selected_month]])
-            input_data_month_scaled = scaler_X.transform(input_data_month)
-            prediction_day_month = make_prediction(model, scaler_X, input_data_month_scaled)
-            total_prediction_month += prediction_day_month[0]
-
-        # Format de la consommation totale du mois
-        prediction_month_kwh = "{:.2E}".format(total_prediction_month)
-        prediction_month_mwh = "{:.2E}".format(total_prediction_month / 1000)
-
-        st.write(f"La prédiction pour la consommation totale du mois de {future_date.strftime('%B %Y')} est : {prediction_month_kwh} kWh")
-        st.write(f"La prédiction pour la consommation totale du mois de {future_date.strftime('%B %Y')} est : {prediction_month_mwh} MWh")
+    else:
+        st.error(f"Erreur : Nombre de caractéristiques incorrect. Attendu {X.shape[1]}, mais reçu {input_data_day.shape[1]}.")

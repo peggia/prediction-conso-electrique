@@ -263,7 +263,7 @@ if section == "Section 1 : Visualisation de la consommation":
 
 
     fig23 = px.treemap(df, path=['SAISON', 'REGION'], values='ENERGIE_SOUTIREE',
-                   color='ENERGIE_SOUTIREE', hover_data=['REGION'],
+                   color='ENERGIE_SOUTIREE', hover_data=['ENERGIE_SOUTIREE'],
                    title="Treemap de la consommation d'énergie par région et saison",
                    color_continuous_scale='Viridis')
     st.plotly_chart(fig23, use_container_width=True)
@@ -272,12 +272,12 @@ if section == "Section 1 : Visualisation de la consommation":
    #Top 3 des régions qui consomment le plus d'énergie en moyenne par nombre de points de soutirage
     # Obtenir le top 3 des régions pour chaque saison
     df_conso_moyenne_saison= df.groupby(['REGION','SAISON'])['CONSO_MOYENNE'].mean().reset_index()
-    df_top_3_regions = df_conso_moyenne_saison.groupby('SAISON',as_index=False).apply(lambda x: x.nlargest(5, 'CONSO_MOYENNE')).reset_index(drop=True)
+    df_top_3_regions = df_conso_moyenne_saison.groupby('SAISON')[['SAISON','CONSO_MOYENNE','REGION']].apply(lambda x: x.nlargest(5, 'CONSO_MOYENNE')).reset_index(drop=True)
     #ordonner par ordre décroissant
     df_conso_top_3_regions = df_top_3_regions.sort_values(by='CONSO_MOYENNE', ascending=False)
 
     fig24 = px.treemap(df_conso_top_3_regions, path=['SAISON', 'REGION'], values='CONSO_MOYENNE',
-                   color='CONSO_MOYENNE', hover_data=['REGION'],
+                   color='CONSO_MOYENNE', hover_data=['CONSO_MOYENNE'],
                    title="Treemap de la consommation moyenne par région et saison",
                    color_continuous_scale='Viridis')
     st.plotly_chart(fig24, use_container_width=True)
@@ -301,44 +301,48 @@ elif section == "Section 2 : Visualisation consommation et météo":
     ### Explication :
     Cette section vous permet d'analyser les relations entre la consommation d'énergie et les variables météorologiques telles que la température, les précipitations, et l'humidité.
     """)
-    #pour l'instant utilisé par volet 2 (2 régions)
-    df_hf_cvl_full = get_df_from_csv('df_hf_cvl_full.csv')
+    #(on n'utilise plus le suivant car contient seulement 2 régions)
+    #df_hf_cvl_full = get_df_from_csv('df_hf_cvl_full.csv')
+    # Charger les fichiers CSV
+    # même df utilisé pour les volets 1 et 3, chargé avec la fonciton qui le met en cache
+    df_all_regions = get_df_from_csv('dfmlenedis.csv')
+
     # Visualisation 1 : Température maximale vs consommation
-    fig11 = px.scatter(df_hf_cvl_full, x='MAX_TEMPERATURE_C', y='ENERGIE_SOUTIREE', color='REGION',
-                       color_discrete_map=region_colors, title="Température maximale vs consommation")
+    fig11 = px.scatter(df_all_regions, x='Avg_Temperature', y='ENERGIE_SOUTIREE', color='REGION',
+                       color_discrete_map=region_colors, title="Consommation vs Température moyenne ")
     st.plotly_chart(fig11, use_container_width=True)
     st.markdown("**Utilité :** Ce graphique montre comment la température influence la consommation d'énergie dans chaque région.")
 
     # Visualisation 2 : Précipitations vs consommation
-    fig12 = px.scatter(df_hf_cvl_full, x='PRECIP_TOTAL_DAY_MM', y='ENERGIE_SOUTIREE', color='REGION',
-                       color_discrete_map=region_colors, title="Précipitations vs consommation")
+    fig12 = px.scatter(df_all_regions, x='Avg_Précipitations_24h', y='ENERGIE_SOUTIREE', color='REGION',
+                       color_discrete_map=region_colors, title="Consommation vs Précipitations")
     st.plotly_chart(fig12, use_container_width=True)
     st.markdown("**Utilité :** Ce graphique illustre l'impact des précipitations sur la consommation d'énergie.")
 
-    # Visualisation 3 : Humidité maximale vs consommation
-    fig13 = px.scatter(df_hf_cvl_full, x='HUMIDITY_MAX_PERCENT', y='ENERGIE_SOUTIREE', color='REGION',
-                       color_discrete_map=region_colors, title="Humidité maximale vs consommation")
-    st.plotly_chart(fig13, use_container_width=True)
-    st.markdown("**Utilité :** Il montre la corrélation entre le taux d'humidité et la consommation d'énergie dans chaque région.")
+    # # Visualisation 3 : Humidité maximale vs consommation
+    # fig13 = px.scatter(df_all_regions, x='HUMIDITY_MAX_PERCENT', y='ENERGIE_SOUTIREE', color='REGION',
+    #                    color_discrete_map=region_colors, title="Humidité maximale vs consommation")
+    # st.plotly_chart(fig13, use_container_width=True)
+    # st.markdown("**Utilité :** Il montre la corrélation entre le taux d'humidité et la consommation d'énergie dans chaque région.")
 
     # Visualisation 4 : Consommation pendant les fortes précipitations
-    fig14 = px.bar(df_hf_cvl_full[df_hf_cvl_full['PRECIP_TOTAL_DAY_MM'] > 10], x='REGION', y='ENERGIE_SOUTIREE',
+    fig14 = px.bar(df_all_regions[df_all_regions['Avg_Précipitations_24h'] > 10], x='REGION', y='ENERGIE_SOUTIREE',
                    color='REGION', color_discrete_map=region_colors,
                    title="Consommation pendant les fortes précipitations")
     st.plotly_chart(fig14, use_container_width=True)
     st.markdown("**Utilité :** Ce graphique compare la consommation d'énergie dans les jours de fortes pluies entre les régions.")
 
-    # Visualisation 5 : Vitesse du vent vs consommation
-    fig15 = px.scatter(df_hf_cvl_full, x='WINDSPEED_MAX_KMH', y='ENERGIE_SOUTIREE', color='REGION',
-                       color_discrete_map=region_colors, title="Vitesse du vent vs consommation")
-    st.plotly_chart(fig15, use_container_width=True)
-    st.markdown("**Utilité :** Ce graphique montre l'influence de la vitesse du vent sur la consommation d'énergie.")
+    # # Visualisation 5 : Vitesse du vent vs consommation
+    # fig15 = px.scatter(df_all_regions, x='WINDSPEED_MAX_KMH', y='ENERGIE_SOUTIREE', color='REGION',
+    #                    color_discrete_map=region_colors, title="Vitesse du vent vs consommation")
+    # st.plotly_chart(fig15, use_container_width=True)
+    # st.markdown("**Utilité :** Ce graphique montre l'influence de la vitesse du vent sur la consommation d'énergie.")
 
-    # Visualisation 6 : Couverture nuageuse vs consommation
-    fig16 = px.scatter(df_hf_cvl_full, x='CLOUDCOVER_AVG_PERCENT', y='ENERGIE_SOUTIREE', color='REGION',
-                       color_discrete_map=region_colors, title="Couverture nuageuse vs consommation")
-    st.plotly_chart(fig16, use_container_width=True)
-    st.markdown("**Utilité :** Ce graphique analyse l'impact de la couverture nuageuse sur la consommation d'énergie.")
+    # # Visualisation 6 : Couverture nuageuse vs consommation
+    # fig16 = px.scatter(df_all_regions, x='CLOUDCOVER_AVG_PERCENT', y='ENERGIE_SOUTIREE', color='REGION',
+    #                    color_discrete_map=region_colors, title="Couverture nuageuse vs consommation")
+    # st.plotly_chart(fig16, use_container_width=True)
+    # st.markdown("**Utilité :** Ce graphique analyse l'impact de la couverture nuageuse sur la consommation d'énergie.")
 
     # Visualisation 7 : Histogramme consommation et température
     # fig17 = px.histogram(df_hf_cvl_full, x='ENERGIE_SOUTIREE', nbins=50, color='MAX_TEMPERATURE_C',
@@ -353,28 +357,50 @@ elif section == "Section 2 : Visualisation consommation et météo":
     # st.markdown("**Utilité :** Cet histogramme illustre la distribution des consommations en fonction des précipitations.")
 
     # Visualisation 9 : Consommation par région pendant les vacances scolaires
-    fig19 = px.bar(df_hf_cvl_full[df_hf_cvl_full['Vacances'] == 1], x='REGION', y='ENERGIE_SOUTIREE', color='REGION',
+    fig19 = px.bar(df_all_regions[df_all_regions['Vacances'] == 1], x='REGION', y='ENERGIE_SOUTIREE', color='REGION',
                    color_discrete_map=region_colors, title="Consommation pendant les vacances scolaires")
     st.plotly_chart(fig19, use_container_width=True)
     st.markdown("**Utilité :** Il permet d'analyser la consommation pendant les vacances scolaires dans les différentes régions.")
+## test Peggi
+   # Visualisation 9.a : Consommation par région pendant les vacances scolaires
+    # Créer une nouvelle colonne pour indiquer si c'est pendant ou en dehors des vacances
+    df_all_regions['Vacances_Status'] = df_all_regions['Vacances'].map({1: 'En Vacances', 0: 'Hors Vacances'})
+
+    # Regrouper par REGION et Vacances_Status et sommer la consommation
+    df_comparaison = df_all_regions.groupby(['REGION', 'Vacances_Status'])['ENERGIE_SOUTIREE'].sum().reset_index()
+
+    # Créer le graphique à barres
+    fig20 = px.bar(df_comparaison, x='REGION', y='ENERGIE_SOUTIREE', color='Vacances_Status',
+                    color_discrete_map={'En Vacances': '#88b949', 'Hors Vacances': 'orange'},
+                    barmode='group',
+                    title="Comparaison de la consommation d'énergie par région pendant et en dehors des vacances scolaires")
+
+    # Afficher le graphique
+    st.plotly_chart(fig20, use_container_width=True)
+    st.markdown("**Utilité :** Il permet d'analyser la consommation d'énergie pendant et en dehors des vacances scolaires dans les différentes régions.")
 
 # Visualisation 12 : Heatmap de corrélation
-    corr_matrix = df_hf_cvl_full[['ENERGIE_SOUTIREE', 'MAX_TEMPERATURE_C', 'PRECIP_TOTAL_DAY_MM', 'HUMIDITY_MAX_PERCENT']].corr()
-    fig, ax = plt.subplots(figsize=(10, 6))
+    corr_matrix = df_all_regions[['ENERGIE_SOUTIREE', 'Avg_Temperature', 'Avg_Précipitations_24h']].corr()
+    fig, ax = plt.subplots(figsize=(4, 2))
     sns.heatmap(corr_matrix, annot=True, cmap="coolwarm", ax=ax)
     st.pyplot(fig)
     st.markdown("**Utilité :** La heatmap montre les corrélations entre les variables climatiques et la consommation d'énergie, aidant à identifier des relations potentielles.")
 
 # Visualisation 13 : Violin plot pour la distribution de la consommation
-    fig22 = px.violin(df_hf_cvl_full, x='REGION', y='ENERGIE_SOUTIREE', color='REGION',
-                  box=True, points="all", hover_data=df_hf_cvl_full.columns,
-                  title="Distribution de la consommation d'énergie par région")
+   
+
+    # Créer le violin plot
+    fig22 = px.violin(df_all_regions, x='REGION', y='ENERGIE_SOUTIREE', color='REGION',
+                    box=True, points="all", hover_data=df_all_regions.columns,
+                    title="Distribution de la consommation d'énergie par région")
+
+    # Afficher le graphique
     st.plotly_chart(fig22, use_container_width=True)
     st.markdown("**Utilité :** Le violin plot permet de voir la distribution de la consommation dans chaque région ainsi que sa densité.")
 
 # Visualisation 16 : Température vs consommation avec régression linéaire
-    fig25 = px.scatter(df_hf_cvl_full, x='MAX_TEMPERATURE_C', y='ENERGIE_SOUTIREE', trendline='ols',
-                   color='REGION', title="Température maximale vs consommation avec régression linéaire")
+    fig25 = px.scatter(df_all_regions, x='Avg_Temperature', y='ENERGIE_SOUTIREE', trendline='ols',
+                   color='REGION', title="Consommation vs Température moyenne avec régression linéaire")
     st.plotly_chart(fig25, use_container_width=True)
     st.markdown("**Utilité :** La régression linéaire ajoute une ligne de tendance qui montre la relation entre la température et la consommation.")
 # ---------------------------------------------------------------------------

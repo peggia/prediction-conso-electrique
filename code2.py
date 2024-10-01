@@ -403,7 +403,7 @@ elif section == "Section 2 : Visualisation consommation et météo":
                    color='REGION', title="Consommation vs Température moyenne avec régression linéaire")
     st.plotly_chart(fig25, use_container_width=True)
     st.markdown("**Utilité :** La régression linéaire ajoute une ligne de tendance qui montre la relation entre la température et la consommation.")
-# ---------------------------------------------------------------------------
+# --------------------------------------------------------------------------- 
 # Section 3 : Prédiction basée sur les données historiques avec Random Forest
 # ---------------------------------------------------------------------------
 elif section == "Section 3 : Prédiction basée sur données historiques":
@@ -485,8 +485,9 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
             vacances = df_filtered['Vacances'].values[0]
 
             # Entrées utilisateur pour la température et les précipitations
-            feature_temperature = st.number_input('Entrez la température moyenne (°C)', value=df_filtered['Avg_Temperature'].values[0])
-            feature_precipitations = st.number_input('Entrez les précipitations moyennes sur 24h (mm)', value=df_filtered['Avg_Précipitations_24h'].values[0])
+            st.write("Données historiques trouvées pour cette combinaison de région et de date.")
+            feature_temperature = df_filtered['Avg_Temperature'].values[0]
+            feature_precipitations = df_filtered['Avg_Précipitations_24h'].values[0]
             feature_pluie = 1 if feature_precipitations > 0 else 0  # 1 si pluie, sinon 0
 
             # Collecte des données d'entrée pour le jour sélectionné
@@ -522,4 +523,3 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
 
                 st.write(f"La prédiction pour la consommation totale du mois de {future_date.strftime('%B %Y')} est : {prediction_month_kwh} kWh")
                 st.write(f"La prédiction pour la consommation totale du mois de {future_date.strftime('%B %Y')} est : {prediction_month_mwh} MWh")
-

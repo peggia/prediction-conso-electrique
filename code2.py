@@ -418,7 +418,10 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
             DayLength_hours = df.loc[mask, 'DayLength_hours'].median()
             mask_region = (df['REGION'] == region)
             nb_points_soutirage = df.loc[mask_region, 'NB_POINTS_SOUTIRAGE'].median()
-
+            if precipitation == None:
+                precipitation = df.loc[mask, 'Avg_Précipitations_24h'].median()
+            if temperature == None:
+                temperature = df.loc[mask, 'Avg_Temperature'].median()
             X_input = pd.DataFrame([[nb_points_soutirage, temperature, precipitation, DayLength_hours, Vacances, date.day, date.month]],
                                    columns=['NB_POINTS_SOUTIRAGE', 'Avg_Temperature', 'Avg_Précipitations_24h',
                                             'DayLength_hours', 'Vacances', 'day', 'month'])

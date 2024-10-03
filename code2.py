@@ -481,6 +481,7 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
         st.plotly_chart(fig, use_container_width=True)
 
     # Fonction pour entraîner le modèle Random Forest avec les données historiques
+    @st.cache_resource 
     def init_model(df):
         # Colonnes à utiliser pour les prédictions
         features = ['NB_POINTS_SOUTIRAGE', 'Avg_Temperature', 'Avg_Précipitations_24h',

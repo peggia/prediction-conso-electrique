@@ -554,7 +554,7 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
 
         if prediction is not None:
             prediction_Mwh = prediction[0] / 1_000_000
-            st.success(f"Prédiction de consommation : {int(prediction_Mwh)} MWh pour la date {future_date.strftime('%d/%m/%Y')}.")
+            st.success(f"Prédiction de consommation pour la région : {int(prediction_Mwh)} MWh pour la date {future_date.strftime('%d/%m/%Y')}.")
 
             # Visualisation pour le mois
             visualize_month(df, model, scaler, future_date.month, future_date.year, selected_region)

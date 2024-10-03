@@ -507,8 +507,8 @@ elif section == "Section 3 : Prédiction basée sur données historiques":
         # Évaluer le modèle
         train_score = model.score(X_train, y_train)
         test_score = model.score(X_test, y_test)
-        st.write(f"Score du modèle sur les données d'entraînement: {train_score:.2f}")
-        st.write(f"Score du modèle sur les données de test: {test_score:.2f}")
+        # st.write(f"Score du modèle sur les données d'entraînement: {train_score:.2f}")
+        # st.write(f"Score du modèle sur les données de test: {test_score:.2f}")
 
         return model, scaler
 

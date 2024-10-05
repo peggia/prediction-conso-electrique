@@ -23,11 +23,7 @@ st.set_page_config(page_title="Prédiction électrique", layout="wide", page_ico
 # Ajout de style CSS personnalisé pour correspondre au thème Enedis
 st.markdown("""
     <style>
-    # /* Fond vert d'Enedis */
-    # .main {
-    #     background-color: #88b949;
-    #     padding: 20px;
-    # }
+
     h1 {
         color: #00509e;
         font-family: 'Helvetica Neue', sans-serif;
@@ -102,6 +98,9 @@ section = st.sidebar.radio("Aller à :",
                             "Conso électrique + météo + vacances", 
                             "Prédiction"])
 
+
+
+#### CONFIG
 # Couleurs distinctes pour chaque région (adaptées aux daltoniens)
 region_colors = {
     'Hauts-de-France': '#d73027',  # Red
@@ -122,10 +121,21 @@ region_colors = {
 # ---------------------------------------------------------------------------
 # Section 1 : Visualisation de la consommation d'énergie par région et périodes
 # ---------------------------------------------------------------------------
+def sommaire_1():
+    st.subheader("Liste des Visuels",anchor="liste-des-visuels")
+    st.markdown("- [Les régions](#les-régions)")
+    st.markdown("- [Pourcentages de consommation par région](#pourcentages-de-consommation-par-région)")
+    st.markdown("- [Taille des régions](#taille-des-régions)")
+    st.markdown("- [Consommation moyenne par région](#consommation-moyenne-par-région)")
+    st.markdown("- [Évolution de la consommation d'électricité](#évolution-de-la-consommation-délectricité)")
+    st.markdown("- [Consommation moyenne par région et saison](#consommation-moyenne-par-région-et-saison)")
+
 if section == "Conso électrique":
-    st.header("Indicateurs de consommation électrique par région")
+    #st.header("Indicateurs de consommation électrique par région")
     
-    st.markdown(""" Période entre le 01/01/2022 et le 30/062024. """)
+    st.markdown("Indicateurs de consommation électrique par région entre le 01/01/2022 et le 30/062024.")
+
+    sommaire_1()
     # Charger les fichiers CSV
     df = get_df_from_csv('dfmlenedis.csv')
 
@@ -145,8 +155,8 @@ if section == "Conso électrique":
     
     
     # Carte interactive de la consommation d'énergie par région
-    #st.markdown(" Carte interactive de la consommation par région")
-    
+    st.subheader("Les régions",anchor="les-régions")
+
     # Coordonnées géographiques des régions
     geo_data = {
         'Hauts-de-France': [50.6292, 3.0573],
@@ -175,79 +185,85 @@ if section == "Conso électrique":
     fig_map = px.scatter_mapbox(df, lat='LAT', lon='LON', size='ENERGIE_SOUTIREE',
                                 color='REGION', color_discrete_map=region_colors,
                                 hover_name='REGION', hover_data={'ENERGIE_SOUTIREE': True, 'NB_POINTS_SOUTIRAGE': True},
-                                title="Carte interactive de la consommation d'énergie par région", 
+                                #title="Carte interactive de la consommation d'énergie par région", 
                                 mapbox_style="open-street-map", zoom=3.9,
                                 center={"lat": 46.603354, "lon": 1.888334},  # Centrer sur la France
                                 labels={'ENERGIE_SOUTIREE': 'Énergie soutirée (Wh)', 'NB_POINTS_SOUTIRAGE': 'Nombre de points de soutirage', 'REGION': 'Région'})
     
     st.plotly_chart(fig_map, use_container_width=True)
-   
-    # # Ajouter des annotations pour les régions
-    # for index, row in df.iterrows():
-    #     fig_map.add_annotation(
-    #     x=row['LON'],
-    #     y=row['LAT'],
-    #     text=row['REGION'],
-    #     showarrow=True,
-    #     arrowhead=2,
-    #     ax=0,
-    #     ay=-40,  # Ajustez cette valeur pour positionner le texte
-    #     font=dict(color='white'),
-    #     bgcolor='rgba(0,0,0,0.7)'  # Fond semi-transparent pour le texte
-    # )
-        
+    st.write("")
+    st.write("")
+    st.markdown(":arrow_up:[Revenir à la liste](#liste-des-visuels)")
+
     #Visualisation 1 : Répartition de la consommation par région (pie chart)
+    st.subheader("Pourcentages de consommation par région",anchor ="pourcentages-de-consommation-par-région")
     fig1 = px.pie(df, names='REGION', values='ENERGIE_SOUTIREE',
                   color_discrete_map=region_colors,
-                  title="Répartition de la consommation par région",
+                  #title="Répartition de la consommation par région",
                   labels={'ENERGIE_SOUTIREE': 'Énergie soutirée (Wh)', 'REGION': 'Région'})
     st.plotly_chart(fig1, use_container_width=True)
     st.markdown("Ce graphique en secteurs montre la part de chaque région dans la consommation totale.")
+    st.write("")
+    st.write("")
+    st.markdown(":arrow_up:[Revenir à la liste](#liste-des-visuels)")
 
     # Visualisation 2 : Nombre de points de soutirage par région
+    st.subheader("Taille des régions",anchor="taille-des-régions")
     df_points_region = df.groupby(['REGION'])['NB_POINTS_SOUTIRAGE'].mean().reset_index()
     df_sorted_nb_points = df_points_region.sort_values(by='NB_POINTS_SOUTIRAGE', ascending=False)
     fig2 = px.bar(df_sorted_nb_points, x='REGION', y='NB_POINTS_SOUTIRAGE', color='REGION',
                   color_discrete_map=region_colors,
-                  title="Nombre de points de soutirage par région",
+                  #title="Nombre de points de soutirage par région",
                   labels={'NB_POINTS_SOUTIRAGE': 'Nombre de points de soutirage', 'REGION': 'Région'})
     st.plotly_chart(fig2, use_container_width=True)
     st.markdown(" Le nombre de points de soutirage est le nombre de contrats de soucription actifs dans la région. Les 3 Régions avec le plus de contrats actifs sont: l'Ile-de-France, l'Auvergne-Rhône-Alpes et l'Occitanie ")
+    st.write("")
+    st.write("")
+    st.markdown(":arrow_up:[Revenir à la liste](#liste-des-visuels)")
 
     # Visualisation 3 : Consommation moyenne par région
+    st.subheader("Consommation moyenne par région",anchor="consommation-moyenne-par-région")
     df['CONSO_MOYENNE'] = df['ENERGIE_SOUTIREE'] / df['NB_POINTS_SOUTIRAGE']
     df_conso_moyenne = df.groupby(['REGION'])['CONSO_MOYENNE'].mean().reset_index()
     df_conso_moyenne_sorted = df_conso_moyenne.sort_values(by='CONSO_MOYENNE', ascending=False)
     fig3 = px.bar(df_conso_moyenne_sorted, x='REGION', y='CONSO_MOYENNE', color='REGION',
                   color_discrete_map=region_colors,
-                  title="Consommation moyenne par rapport au nombre de points soutirage par région",
+                  #title="Consommation moyenne par rapport au nombre de points soutirage par région",
                   labels={'CONSO_MOYENNE': 'Consommation moyenne (Wh par point de soutirage)', 'REGION': 'Région'})
     fig3.update_xaxes(categoryorder='total descending')
     st.plotly_chart(fig3, use_container_width=True)
     st.markdown(" Les 3 régions les plus énergivores (consommation moyenne par point de soutirage les plus elevées): Centre-Val-de-Loire (région avec le moins de points de soutirage !), suivie de la Normandie et le Pays de la Loire. ")
-
+    st.write("")
+    st.write("")
+    st.markdown(":arrow_up:[Revenir à la liste](#liste-des-visuels)")
 
     # Visualisation 4 : Séries temporelles de la consommation d'énergie
+    st.subheader("Évolution de la consommation d'électricité",anchor="évolution-de-la-consommation-délectricité")
     fig4 = px.line(df, x='DATE', y='ENERGIE_SOUTIREE', color='REGION',
                     color_discrete_map=region_colors,
-                    title="Évolution de la consommation d'énergie dans le temps:",
+                    #title="Consommation d'électricité par date",
                     labels={'DATE': 'Date', 'ENERGIE_SOUTIREE': 'Énergie soutirée (Wh)', 'REGION': 'Région'})
     st.plotly_chart(fig4, use_container_width=True)
-    st.markdown(" Une forme similaire est observable dans l’ensemble des régions, au fil des saisons, avec un pic l'hiver. ")
+    st.markdown("Une forme similaire est observable dans l’ensemble des régions, au fil des saisons, avec un pic l'hiver.")
+    st.write("")
+    st.write("")
+    st.markdown(":arrow_up:[Revenir à la liste](#liste-des-visuels)")
 
     # Visualisation 5 : Treemap de la consommation moyenne par région et saison
+    st.subheader("Consommation moyenne par région et saison", anchor="consommation-moyenne-par-région-et-saison")
     df_conso_moyenne_saison = df.groupby(['REGION', 'SAISON'])['CONSO_MOYENNE'].mean().reset_index()
     df_top_regions = df_conso_moyenne_saison.groupby('SAISON')[['SAISON', 'CONSO_MOYENNE', 'REGION']].apply(lambda x: x.nlargest(5, 'CONSO_MOYENNE')).reset_index(drop=True)
     df_conso_top_regions = df_top_regions.sort_values(by='CONSO_MOYENNE', ascending=False)
 
     fig5 = px.treemap(df_conso_top_regions, path=['SAISON', 'REGION'], values='CONSO_MOYENNE',
                        color='CONSO_MOYENNE', hover_data=['CONSO_MOYENNE'],
-                       title="Treemap: TOP 5 des régions qui consomment le plus en moyenne, par saison ",
+                       #title="TOP 5 des régions qui consomment le plus en moyenne, par saison ",
                        color_continuous_scale='Viridis',
                        labels={'SAISON': 'Saison', 'REGION': 'Région', 'CONSO_MOYENNE': 'Consommation moyenne (Wh par point de soutirage)'})
     st.plotly_chart(fig5, use_container_width=True)
     st.markdown(" L’été, les régions du sud sont dans le podium ! L'utilisation de climatiseurs, ainsi que l'affluence de vacanciers expliquent en partie cette consommaiton moyenne plus elevée. ")
-
+    st.markdown(":arrow_up:[Revenir à la liste](#liste-des-visuels)")
+    
 # ---------------------------------------------------------------------------
 # Section 2 : Visualisation consommation et météo
 # ---------------------------------------------------------------------------

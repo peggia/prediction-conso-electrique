@@ -87,17 +87,20 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Insertion du logo
+st.write("")
+st.write("")
+st.write("")
 st.image('enedis.png', width=120)
 
 # Titre principal de la page
-st.markdown("<h1> Consommation éléctrique en France Métropolitaine </h1>", unsafe_allow_html=True)
+st.markdown("<h1>Consommation éléctrique en France Métropolitaine </h1>", unsafe_allow_html=True)
 
 # Barre latérale pour la navigation entre les sections
 st.sidebar.title("Navigation")
 section = st.sidebar.radio("Aller à :", 
-                           ["Analyse conso électrique", 
-                            "Analyse conso électrique + météo + vacances", 
-                            "Prédiction conso électrique"])
+                           ["Conso électrique", 
+                            "Conso électrique + météo + vacances", 
+                            "Prédiction"])
 
 # Couleurs distinctes pour chaque région (adaptées aux daltoniens)
 region_colors = {
@@ -119,7 +122,7 @@ region_colors = {
 # ---------------------------------------------------------------------------
 # Section 1 : Visualisation de la consommation d'énergie par région et périodes
 # ---------------------------------------------------------------------------
-if section == "Analyse conso électrique":
+if section == "Conso électrique":
     st.header("Indicateurs de consommation électrique par région")
     
     st.markdown(""" Période entre le 01/01/2022 et le 30/062024. """)
@@ -233,11 +236,10 @@ if section == "Analyse conso électrique":
 # ---------------------------------------------------------------------------
 # Section 2 : Visualisation consommation et météo
 # ---------------------------------------------------------------------------
-elif section == "Analyse conso électrique + météo + vacances":
+elif section == "Conso électrique + météo + vacances":
     st.header("Consommation électrique en fonction de la météo et les vacances")
     
-    st.markdown("""Influence des périodes de vacances et de quelques variables météorologiques sur des relations la consommation d'électricité.
-    """)
+    st.markdown("""Influence des périodes de vacances et de quelques variables météorologiques sur des relations la consommation d'électricité.""")
     df_all_regions = get_df_from_csv('dfmlenedis.csv')
 
     # Visualisation 6 : Comparaison de la consommation pendant et hors vacances
@@ -290,15 +292,11 @@ elif section == "Analyse conso électrique + météo + vacances":
 # ---------------------------------------------------------------------------
 # Section 3 : Prédiction basée sur les données historiques avec Random Forest
 # ---------------------------------------------------------------------------
-elif section == "Prédiction conso électrique":
+elif section == "Prédiction":
     st.header("Prédiction de consommation électrique")
 
     # Explication pour l'utilisateur
     st.markdown("""Cette section vous permet de prédire la consommation électrique pour une date donnée en utilisant un modèle d'apprentissage automatique de type Random Forest.""")
-
-    # Importations nécessaires
-    import datetime  # Importer le module datetime
-    from datetime import timedelta
 
     # Charger le fichier CSV
     df = get_df_from_csv('dfmlenedis.csv')

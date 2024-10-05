@@ -207,7 +207,7 @@ if section == "Analyse conso électrique":
                   title="Consommation moyenne par rapport au nombre de points soutirage par région",
                   labels={'CONSO_MOYENNE': 'Consommation moyenne (Wh par point de soutirage)', 'REGION': 'Région'})
     fig3.update_xaxes(categoryorder='total descending')
-    st.plotly_chart(fig6, use_container_width=True)
+    st.plotly_chart(fig3, use_container_width=True)
     st.markdown(" Les 3 régions les plus énergivores (consommation moyenne par point de soutirage les plus elevées): Centre-Val-de-Loire (région avec le moins de points de soutirage !), suivie de la Normandie et le Pays de la Loire. ")
 
 

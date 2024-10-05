@@ -151,7 +151,7 @@ if section == "Conso électrique":
     geo_data = {
         'Hauts-de-France': [50.6292, 3.0573],
         'Centre-Val de Loire': [47.7516, 1.6751],
-        'Nouvelle-Aquitaine': [44.8378, -0.5792],
+        'Nouvelle Aquitaine': [44.8378, -0.5792],
         'Île-de-France': [48.8566, 2.3522],
         'Grand-Est': [48.5734, 7.7521],
         'Normandie': [49.1829, -0.3707],
@@ -176,11 +176,26 @@ if section == "Conso électrique":
                                 color='REGION', color_discrete_map=region_colors,
                                 hover_name='REGION', hover_data={'ENERGIE_SOUTIREE': True, 'NB_POINTS_SOUTIRAGE': True},
                                 title="Carte interactive de la consommation d'énergie par région", 
-                                mapbox_style="open-street-map", zoom=4,
+                                mapbox_style="open-street-map", zoom=3.9,
+                                center={"lat": 46.603354, "lon": 1.888334},  # Centrer sur la France
                                 labels={'ENERGIE_SOUTIREE': 'Énergie soutirée (Wh)', 'NB_POINTS_SOUTIRAGE': 'Nombre de points de soutirage', 'REGION': 'Région'})
-    fig_map.update_layout(mapbox_zoom=4, mapbox_center={"lat": 46.603354, "lon": 1.888334})  # Centrer sur la France
-    st.plotly_chart(fig_map, use_container_width=True)
     
+    st.plotly_chart(fig_map, use_container_width=True)
+   
+    # Ajouter des annotations pour les régions
+    for index, row in df.iterrows():
+    fig_map.add_annotation(
+        x=row['LON'],
+        y=row['LAT'],
+        text=row['REGION'],
+        showarrow=True,
+        arrowhead=2,
+        ax=0,
+        ay=-40,  # Ajustez cette valeur pour positionner le texte
+        font=dict(color='white'),
+        bgcolor='rgba(0,0,0,0.7)'  # Fond semi-transparent pour le texte
+    )
+        
     #Visualisation 1 : Répartition de la consommation par région (pie chart)
     fig1 = px.pie(df, names='REGION', values='ENERGIE_SOUTIREE',
                   color_discrete_map=region_colors,

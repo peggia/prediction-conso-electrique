@@ -395,8 +395,9 @@ elif section == "Prédiction conso électrique":
         fig = px.line(x=dates, y=predictions,
                       title=f"Prédiction de la consommation pour {month}/{year}",
                       labels={'x': 'Date', 'y': 'Consommation prédite (Wh)'})
-        st.plotly_chart(fig, use_container_width=True)
         fig.update_yaxes(rangemode="tozero")
+        st.plotly_chart(fig, use_container_width=True)
+
     # Visualisation des prédictions pour l'année entière
     def visualize_year(df, model, X_scaler, year, region):
         months = range(1, 13)

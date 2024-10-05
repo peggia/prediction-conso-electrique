@@ -18,16 +18,16 @@ def get_df_from_csv(fn):
     return pd.read_csv(fn, encoding='utf-8')
 
 # Configuration de la page Streamlit avec une disposition large et un titre personnalisé
-st.set_page_config(page_title="Dashboard Énergétique", layout="wide", page_icon='logo PY²MN.png')
+st.set_page_config(page_title="Prédiction électrique", layout="wide", page_icon= 'ressources/ENEDIS_Icone.png') #'logo PY²MN.png')
 
 # Ajout de style CSS personnalisé pour correspondre au thème Enedis
 st.markdown("""
     <style>
-    /* Fond vert d'Enedis */
-    .main {
-        background-color: #88b949;
-        padding: 20px;
-    }
+    # /* Fond vert d'Enedis */
+    # .main {
+    #     background-color: #88b949;
+    #     padding: 20px;
+    # }
     h1 {
         color: #00509e;
         font-family: 'Helvetica Neue', sans-serif;
@@ -294,8 +294,7 @@ elif section == "Prédiction conso électrique":
     st.header("Prédiction de consommation électrique")
 
     # Explication pour l'utilisateur
-    st.markdown("""Cette section vous permet de prédire la consommation électrique pour une date donnée en utilisant un modèle d'apprentissage automatique de type Random Forest.
-    """)
+    st.markdown("""Cette section vous permet de prédire la consommation électrique pour une date donnée en utilisant un modèle d'apprentissage automatique de type Random Forest.""")
 
     # Importations nécessaires
     import datetime  # Importer le module datetime

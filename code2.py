@@ -90,7 +90,7 @@ st.markdown("""
 st.write("")
 st.write("")
 st.write("")
-st.image('enedis.png', width=120)
+st.image('ressources/enedis.png', width=120)
 
 # Titre principal de la page
 st.markdown("<h1>Consommation éléctrique en France Métropolitaine </h1>", unsafe_allow_html=True)

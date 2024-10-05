@@ -15,7 +15,11 @@ Le projet a été effectué dans le cadre de notre préparation à la certificat
 * Fichier python avec le code de l'application streamlit (code2.py)
 * sous-répertoire "Analyse" avec le notebook utilisé pendant l'analyse exploratoire des données
 * sous-répertoire "ML" contenant le notebook utilisé pour l'evaluation des modèles, et les tests unitaires de prediction
-  
+
+# Scénario d'utilisation (Use Case)
+
+  ![ENEDIS-UseCase](https://github.com/user-attachments/assets/adb78f7a-7be1-4684-9cd8-b6567589368f)
+
 # Sources des données
 Données conso électrique:
 https://data.enedis.fr/explore/dataset/consommation-agregee-demi-horaire-des-points-de-soutirage-inferieurs-a-36kva-par%40agenceore/

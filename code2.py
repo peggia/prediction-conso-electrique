@@ -184,7 +184,7 @@ if section == "Conso électrique":
    
     # Ajouter des annotations pour les régions
     for index, row in df.iterrows():
-    fig_map.add_annotation(
+        fig_map.add_annotation(
         x=row['LON'],
         y=row['LAT'],
         text=row['REGION'],

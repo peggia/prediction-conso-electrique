@@ -1,8 +1,9 @@
 # Contexte
 La première version importée dans ce repository est le résultat du travail d'une équipe de 6 personnes, moi y compris, qui avons contribué aux différentes activités du projet, depuis la collecte, le traitement et l'analyse des données, à l'évaluation des modèles de Machine Learning,  l'élaboration de l'interface utilisateur et la mise au point de l'application ainsi que la présentation finale. J'ai essayé de mettre ma patte un peu partout tout au long du projet, histoire d'avoir ma propre vision globale.
 
-Le projet a été effectué dans le cadre de notre préparation à la certification Data Analyst RNCP37429, et il a été présenté le 4/10/24.
+Le projet initial a été effectué dans le cadre de notre préparation à la certification Data Analyst RNCP37429, et il a été présenté le 4/10/24.
 
+Depuis, je fais des modifs à ma sauce 🥰
 
 # Objectifs
 
@@ -20,12 +21,18 @@ Le projet a été effectué dans le cadre de notre préparation à la certificat
 
   ![ENEDIS-UseCase](https://github.com/user-attachments/assets/adb78f7a-7be1-4684-9cd8-b6567589368f)
 
+# Application Streamlit
+Voici le lien vers l'application: https://prediction-conso-electrique-enedis.streamlit.app/
+
 # Sources des données
-Données conso électrique:
+* Données conso électrique:
+
 https://data.enedis.fr/explore/dataset/consommation-agregee-demi-horaire-des-points-de-soutirage-inferieurs-a-36kva-par%40agenceore/
 
-Données Météo: 
+* Données Météo:
+  
 https://public.opendatasoft.com/explore/dataset/donnees-synop-essentielles-omm/table/
 
-Calendrier: 
+* Calendrier:
+  
 https://pypi.org/project/vacances-scolaires-france/

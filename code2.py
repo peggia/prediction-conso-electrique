@@ -122,9 +122,7 @@ region_colors = {
 if section == "Analyse conso électrique":
     st.header("Indicateurs de consommation électrique par région")
     
-    st.markdown("""
-    ### Principaux indicateurs de consommation électrique entre le 01/01/2022 et le 30/062024.
-    """)
+    st.markdown(""" Période entre le 01/01/2022 et le 30/062024. """)
     # Charger les fichiers CSV
     df = get_df_from_csv('dfmlenedis.csv')
 
@@ -144,7 +142,7 @@ if section == "Analyse conso électrique":
     
     
     # Carte interactive de la consommation d'énergie par région
-    st.markdown(" Carte interactive de la consommation par région")
+    #st.markdown(" Carte interactive de la consommation par région")
     
     # Coordonnées géographiques des régions
     geo_data = {
@@ -236,34 +234,25 @@ if section == "Analyse conso électrique":
 # Section 2 : Visualisation consommation et météo
 # ---------------------------------------------------------------------------
 elif section == "Analyse conso électrique + météo + vacances":
-    st.header("Consommation électrique en focntion de la météo et les vacances")
+    st.header("Consommation électrique en fonction de la météo et les vacances")
     
-    st.markdown("""
-    ### Explication :
-    Influence des variables météorologiques(température et nb d'heures d'ensoleillement), et des périodes de vacances sur des relations la consommation d'électricité.
+    st.markdown("""Influence des périodes de vacances et de quelques variables météorologiques sur des relations la consommation d'électricité.
     """)
     df_all_regions = get_df_from_csv('dfmlenedis.csv')
 
-    # Visualisation 6 : Consommation
-    fig6 = px.scatter(df_all_regions, x='DayLength_hours', y='ENERGIE_SOUTIREE', color='REGION',trendline='ols',
-                       color_discrete_map=region_colors, title="Consommationen en fonction du nombre d'heures d'ensoleillement",
-                       labels={'DayLength_hours': 'Ensoleillement (heures)', 'ENERGIE_SOUTIREE': 'Énergie soutirée (Wh)', 'REGION': 'Région'})
-    st.plotly_chart(fig6, use_container_width=True)
-    st.markdown(" Ici l'influence de la variable ensoleillement est légère. En dessous de 10 heures de soeil, plus le nombre d'heures d'ensoleillement augmente plus la consommation d'électricité diminue. ensuite, cela a tendance à se tasser dans la plupart des régions. En effet, on tombe alors dans la saison d'été, où le besoin de chauffage est moindre ar les températures augmentent ")
-
-    # Visualisation 7 : Comparaison de la consommation pendant et hors vacances
+    # Visualisation 6 : Comparaison de la consommation pendant et hors vacances
     df_all_regions['Vacances_Status'] = df_all_regions['Vacances'].map({1: 'En Vacances', 0: 'Hors Vacances'})
     df_comparaison = df_all_regions.groupby(['REGION', 'Vacances_Status'])['ENERGIE_SOUTIREE'].sum().reset_index()
-    fig7 = px.bar(df_comparaison, x='REGION', y='ENERGIE_SOUTIREE', color='Vacances_Status',
+    fig6 = px.bar(df_comparaison, x='REGION', y='ENERGIE_SOUTIREE', color='Vacances_Status',
                    color_discrete_map={'En Vacances': '#88b949', 'Hors Vacances': 'orange'},
                    barmode='group',
                    title="Comparaison de la consommation d'énergie par région pendant et en dehors des vacances scolaires",
                    labels={'ENERGIE_SOUTIREE': 'Énergie soutirée (Wh)', 'REGION': 'Région', 'Vacances_Status': 'Statut des Vacances'})
-    st.plotly_chart(fig7, use_container_width=True)
+    st.plotly_chart(fig6, use_container_width=True)
     st.markdown(" La consommation électrique diminue dans toutes les régions pendant les périodes de vacances. En effet, la consommation dans le foyers diminuent avec les départs en vacances, les établissement scolaires sont fermées, ainsi qu'une partie des entreprises, les transports publics réduisent leurs fréquences de passage, etc. ")
 
     
-    # Visualisation 8 : Heatmap de corrélation interactive
+    # Visualisation 7 : Heatmap de corrélation interactive
     # Calculer la matrice de corrélation
     corr_matrix = df_all_regions[['ENERGIE_SOUTIREE', 'Avg_Temperature', 'Avg_Précipitations_24h','DayLength_hours']].corr()
 
@@ -282,26 +271,32 @@ elif section == "Analyse conso électrique + météo + vacances":
     # Afficher la heatmap dans Streamlit
     st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown(" La corrélation la plus forte est celle de la température moyenne, ce qui confirme que c'est bien la variable qui a le plus d'influence sur la quantité d'énergie consommée ")
+    st.markdown(" La corrélation la plus forte est celle de la température moyenne, c'est donc  la variable qui a le plus d'influence sur la quantité d'électricité consommée ")
 
-    # Visualisation 9 : Température vs consommation avec régression linéaire
-    fig9 = px.scatter(df_all_regions, x='Avg_Temperature', y='ENERGIE_SOUTIREE', trendline='ols',
+    # Visualisation 8 : Température vs consommation avec régression linéaire
+    fig8 = px.scatter(df_all_regions, x='Avg_Temperature', y='ENERGIE_SOUTIREE', trendline='ols',
                        color='REGION', title="Consommation en fonction de la Température moyenne",
                        labels={'Avg_Temperature': 'Température moyenne (°C)', 'ENERGIE_SOUTIREE': 'Énergie soutirée (Wh)', 'REGION': 'Région'})
+    st.plotly_chart(fig8, use_container_width=True)
+    st.markdown("La température moyenne est la variable météo ayant le plus d'influence. Lorque la température augmente, la consommationd'électricité diminue. ")
+
+    # Visualisation 9 : Consommation
+    fig9 = px.scatter(df_all_regions, x='DayLength_hours', y='ENERGIE_SOUTIREE', color='REGION',trendline='ols',
+                       color_discrete_map=region_colors, title="Consommationen en fonction du nombre d'heures d'ensoleillement",
+                       labels={'DayLength_hours': 'Ensoleillement (heures)', 'ENERGIE_SOUTIREE': 'Énergie soutirée (Wh)', 'REGION': 'Région'})
     st.plotly_chart(fig9, use_container_width=True)
-    st.markdown(" La température moyenne est la variable météo ayant le plus d'influence. Lorque la température augmente, la consommationd'électricité diminue. ")
+    st.markdown(" Ici l'influence de la variable ensoleillement est plus nuancée. En dessous de 10 heures de soeil, plus le nombre d'heures d'ensoleillement augmente plus la consommation d'électricité diminue. ensuite, cela a tendance à se tasser dans la plupart des régions. En effet, on tombe alors dans la saison d'été, où le besoin de chauffage est moindre ar les températures augmentent ")
 
 # ---------------------------------------------------------------------------
 # Section 3 : Prédiction basée sur les données historiques avec Random Forest
 # ---------------------------------------------------------------------------
 elif section == "Prédiction conso électrique":
-    st.header("Section 3 : Prédiction de la consommation énergétique avec Random Forest")
+    st.header("Section 3 : Prédiction de consommation électrique")
 
     # Explication pour l'utilisateur
     st.markdown("""
-    ### Explication :
-    Cette section vous permet de prédire la consommation énergétique à partir de données historiques (température, précipitations, etc.) en utilisant un modèle d'apprentissage automatique de type Random Forest.
-    Vous pouvez également faire des prédictions pour des dates futures ou pour des conditions hypothétiques.
+    ###  Cette section vous permet de prédire la consommation énergétique à partir de données historiques (température, précipitations, etc.) en utilisant un modèle d'apprentissage automatique de type Random Forest.
+    Vous pouvez également faire des prédictions pour des dates futures.
     """)
 
     # Importations nécessaires
@@ -440,14 +435,13 @@ elif section == "Prédiction conso électrique":
         X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
 
         # Créer le modèle Random Forest
-        model = RandomForestRegressor(n_estimators=100, random_state=42)
+        #max_depth= 30 trouvé apres optimisation gridSearchCV
+        model = RandomForestRegressor(max_depth= 30,n_estimators=100, random_state=42,)
         model.fit(X_train, y_train)
 
         # Évaluer le modèle
         train_score = model.score(X_train, y_train)
         test_score = model.score(X_test, y_test)
-        # st.write(f"Score du modèle sur les données d'entraînement: {train_score:.2f}")
-        # st.write(f"Score du modèle sur les données de test: {test_score:.2f}")
 
         return model, scaler
 

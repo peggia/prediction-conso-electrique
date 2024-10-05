@@ -454,10 +454,22 @@ elif section == "Prédiction conso électrique":
                'Centre-Val de Loire', 'Grand-Est', 'Hauts-de-France', 'Normandie',
                'Nouvelle-Aquitaine', 'Occitanie', 'Pays de la Loire',
                "Provence-Alpes-Côte d'Azur", 'Île-de-France']
-    selected_region = st.selectbox('Sélectionnez une région', regions)
+    # selected_region = st.selectbox('Sélectionnez une région', regions)
+    # selected_date = st.date_input("Sélectionnez une date", min_value=datetime.date(2019, 1, 1), max_value=datetime.date(2039, 12, 31))
+    # Vérifier si les valeurs sont déjà dans session_state, sinon les initialiser
+    if 'selected_region' not in st.session_state:
+        st.session_state.selected_region = regions[0]
+    if 'selected_date' not in st.session_state:
+        st.session_state.selected_date = datetime.date.today()
+    
+    # Interface utilisateur pour la sélection de la région et de la date
+    selected_region = st.selectbox('Sélectionnez une région', regions, index=regions.index(st.session_state.selected_region))
+    st.session_state.selected_region = selected_region
 
-    selected_date = st.date_input("Sélectionnez une date", min_value=datetime.date(2019, 1, 1), max_value=datetime.date(2039, 12, 31))
-
+    selected_date = st.date_input("Sélectionnez une date", value=st.session_state.selected_date, min_value=datetime.date(2019, 1, 1), max_value=datetime.date(2039, 12, 31))
+    st.session_state.selected_date = selected_date
+    ##
+    
     # Initialisation des variables
     feature_temperature = None
     feature_precipitations = None

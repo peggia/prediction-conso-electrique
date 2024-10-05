@@ -368,8 +368,8 @@ elif section == "Prédiction conso électrique":
             # DayLength_hours = df.loc[(df['month'] == date.month) & (df['day'] == date.day), 'DayLength_hours'].median()
             # nb_points_soutirage = df.loc[df['REGION'] == region, 'NB_POINTS_SOUTIRAGE'].median()
             mask = (df['REGION'] == region) & (df['year'] == date.year) & (df['month'] == date.month) & (df['day'] == date.day)
-            DayLength_hours = df.loc[mask, ['DayLength_hours']
-            nb_points_soutirage = df.loc[mask, ['NB_POINTS_SOUTIRAGE']
+            DayLength_hours = df.loc[mask,'DayLength_hours']
+            nb_points_soutirage = df.loc[mask, 'NB_POINTS_SOUTIRAGE']
             X_input = pd.DataFrame([[nb_points_soutirage, temperature, precipitation, DayLength_hours, Vacances, date.day, date.month]],
                                    columns=['NB_POINTS_SOUTIRAGE', 'Avg_Temperature', 'Avg_Précipitations_24h',
                                             'DayLength_hours', 'Vacances', 'day', 'month'])

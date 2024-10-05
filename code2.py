@@ -182,19 +182,19 @@ if section == "Conso électrique":
     
     st.plotly_chart(fig_map, use_container_width=True)
    
-    # Ajouter des annotations pour les régions
-    for index, row in df.iterrows():
-        fig_map.add_annotation(
-        x=row['LON'],
-        y=row['LAT'],
-        text=row['REGION'],
-        showarrow=True,
-        arrowhead=2,
-        ax=0,
-        ay=-40,  # Ajustez cette valeur pour positionner le texte
-        font=dict(color='white'),
-        bgcolor='rgba(0,0,0,0.7)'  # Fond semi-transparent pour le texte
-    )
+    # # Ajouter des annotations pour les régions
+    # for index, row in df.iterrows():
+    #     fig_map.add_annotation(
+    #     x=row['LON'],
+    #     y=row['LAT'],
+    #     text=row['REGION'],
+    #     showarrow=True,
+    #     arrowhead=2,
+    #     ax=0,
+    #     ay=-40,  # Ajustez cette valeur pour positionner le texte
+    #     font=dict(color='white'),
+    #     bgcolor='rgba(0,0,0,0.7)'  # Fond semi-transparent pour le texte
+    # )
         
     #Visualisation 1 : Répartition de la consommation par région (pie chart)
     fig1 = px.pie(df, names='REGION', values='ENERGIE_SOUTIREE',

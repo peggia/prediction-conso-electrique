@@ -291,12 +291,10 @@ elif section == "Analyse conso électrique + météo + vacances":
 # Section 3 : Prédiction basée sur les données historiques avec Random Forest
 # ---------------------------------------------------------------------------
 elif section == "Prédiction conso électrique":
-    st.header("Section 3 : Prédiction de consommation électrique")
+    st.header("Prédiction de consommation électrique")
 
     # Explication pour l'utilisateur
-    st.markdown("""
-    ###  Cette section vous permet de prédire la consommation énergétique à partir de données historiques (température, précipitations, etc.) en utilisant un modèle d'apprentissage automatique de type Random Forest.
-    Vous pouvez également faire des prédictions pour des dates futures.
+    st.markdown("""Cette section vous permet de prédire la consommation électrique pour une date donnée en utilisant un modèle d'apprentissage automatique de type Random Forest.
     """)
 
     # Importations nécessaires
@@ -367,9 +365,11 @@ elif section == "Prédiction conso électrique":
             precipitation = weather_data['Avg_Précipitations_24h']
 
             Vacances = vacances(date, region)
-            DayLength_hours = df.loc[(df['month'] == date.month) & (df['day'] == date.day), 'DayLength_hours'].median()
-            nb_points_soutirage = df.loc[df['REGION'] == region, 'NB_POINTS_SOUTIRAGE'].median()
-
+            # DayLength_hours = df.loc[(df['month'] == date.month) & (df['day'] == date.day), 'DayLength_hours'].median()
+            # nb_points_soutirage = df.loc[df['REGION'] == region, 'NB_POINTS_SOUTIRAGE'].median()
+            mask = (df['REGION'] == region) & (df['year'] == date.year) & (df['month'] == date.month) & (df['day'] == date.day)
+            DayLength_hours = df.loc[mask, ['DayLength_hours']
+            nb_points_soutirage = df.loc[mask, ['NB_POINTS_SOUTIRAGE']
             X_input = pd.DataFrame([[nb_points_soutirage, temperature, precipitation, DayLength_hours, Vacances, date.day, date.month]],
                                    columns=['NB_POINTS_SOUTIRAGE', 'Avg_Temperature', 'Avg_Précipitations_24h',
                                             'DayLength_hours', 'Vacances', 'day', 'month'])
@@ -396,7 +396,7 @@ elif section == "Prédiction conso électrique":
                       title=f"Prédiction de la consommation pour {month}/{year}",
                       labels={'x': 'Date', 'y': 'Consommation prédite (Wh)'})
         st.plotly_chart(fig, use_container_width=True)
-
+        fig.update_yaxes(rangemode="tozero")
     # Visualisation des prédictions pour l'année entière
     def visualize_year(df, model, X_scaler, year, region):
         months = range(1, 13)
@@ -440,8 +440,8 @@ elif section == "Prédiction conso électrique":
         model.fit(X_train, y_train)
 
         # Évaluer le modèle
-        train_score = model.score(X_train, y_train)
-        test_score = model.score(X_test, y_test)
+        # train_score = model.score(X_train, y_train)
+        # test_score = model.score(X_test, y_test)
 
         return model, scaler
 

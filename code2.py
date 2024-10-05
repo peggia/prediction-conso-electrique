@@ -127,7 +127,7 @@ if section == "Analyse Consommation électrique":
     st.header("Indicateurs de consommation électrique par région")
     
     st.markdown("""
-    ### Principaux indicateurs de consommation électrique par région, pour entre le 01/01/2022 et le 30/062024.
+    ### Principaux indicateurs de consommation électrique entre le 01/01/2022 et le 30/062024.
     """)
     # Charger les fichiers CSV
     df = get_df_from_csv('dfmlenedis.csv')
@@ -145,55 +145,13 @@ if section == "Analyse Consommation électrique":
 
     df['MOIS'] = pd.to_datetime(df['DATE']).dt.month
     df['SAISON'] = df['MOIS'].apply(nommer_saison)
-
-    # Visualisation 1 : Consommation par région
-    df_conso_region = df.groupby(['REGION'])['ENERGIE_SOUTIREE'].sum().reset_index()
-    df_sorted = df_conso_region.sort_values(by='ENERGIE_SOUTIREE', ascending=False)
     
-    fig1 = px.bar(df_sorted, x='REGION', y='ENERGIE_SOUTIREE', color='REGION',
-                  color_discrete_map=region_colors,
-                  title="Consommation d'énergie par région",
-                  labels={'ENERGIE_SOUTIREE': 'Énergie soutirée (Wh)', 'REGION': 'Région'})
-    st.plotly_chart(fig1, use_container_width=True)
-    st.markdown("<body1> Classement des régions par quantité totale d'énérgie consommée </body1>")
-
-    # Visualisation 2 : Nombre de points de soutirage par région
-    df_points_region = df.groupby(['REGION'])['NB_POINTS_SOUTIRAGE'].mean().reset_index()
-    df_sorted_nb_points = df_points_region.sort_values(by='NB_POINTS_SOUTIRAGE', ascending=False)
-    fig5 = px.bar(df_sorted_nb_points, x='REGION', y='NB_POINTS_SOUTIRAGE', color='REGION',
-                  color_discrete_map=region_colors,
-                  title="Nombre de points de soutirage par région",
-                  labels={'NB_POINTS_SOUTIRAGE': 'Nombre de points de soutirage', 'REGION': 'Région'})
-    st.plotly_chart(fig5, use_container_width=True)
-    st.markdown("<body1> Le nombre de points de soutirage est le nombre de contrats de soucription actifs dans la région. Les 3 Régions avec le plus de contrats actifs sont: l'Ile-de-France, l'Auvergne-Rhône-Alpes et l'Occitanie </body1>")
-
-    # Visualisation 3 : Consommation moyenne par région
-    df['CONSO_MOYENNE'] = df['ENERGIE_SOUTIREE'] / df['NB_POINTS_SOUTIRAGE']
-    df_conso_moyenne = df.groupby(['REGION'])['CONSO_MOYENNE'].mean().reset_index()
-    df_conso_moyenne_sorted = df_conso_moyenne.sort_values(by='CONSO_MOYENNE', ascending=False)
-    fig6 = px.bar(df_conso_moyenne_sorted, x='REGION', y='CONSO_MOYENNE', color='REGION',
-                  color_discrete_map=region_colors,
-                  title="Consommation moyenne par rapport au nombre de points soutirage par région",
-                  labels={'CONSO_MOYENNE': 'Consommation moyenne (Wh par point de soutirage)', 'REGION': 'Région'})
-    fig6.update_xaxes(categoryorder='total descending')
-    st.plotly_chart(fig6, use_container_width=True)
-    st.markdown("<body1> Les 3 régions les plus énergivores (consommation moyenne par point de soutirage les plus elevées): Centre-Val-de-Loire (région avec le moins de points de soutirage !), suivie de la Normandie et le Pays de la Loire. </body1>")
-
-    # # Visualisation 4 : Consommation par saison (Box plot)
-    # df_conso_full_year = df[~(df['DATE'].str.contains('2024'))]
-    # fig3 = px.box(df_conso_full_year, x='SAISON', y='ENERGIE_SOUTIREE', color='REGION',
-    #               color_discrete_map=region_colors,
-    #               title="Consommation par saison",
-    #               labels={'SAISON': 'Saison', 'ENERGIE_SOUTIREE': 'Énergie soutirée (Wh)', 'REGION': 'Région'})
-    # st.plotly_chart(fig3, use_container_width=True)
-    # st.markdown("**Utilité :** Ce graphique montre la variation de la consommation d'énergie selon les saisons.")
-
-    # Visualisation 5 : Répartition de la consommation par région (pie chart)
-    fig4 = px.pie(df, names='REGION', values='ENERGIE_SOUTIREE',
+    # Visualisation 1 : Répartition de la consommation par région (pie chart)
+    fig1 = px.pie(df, names='REGION', values='ENERGIE_SOUTIREE',
                   color_discrete_map=region_colors,
                   title="Répartition de la consommation par région",
                   labels={'ENERGIE_SOUTIREE': 'Énergie soutirée (Wh)', 'REGION': 'Région'})
-    st.plotly_chart(fig4, use_container_width=True)
+    st.plotly_chart(fig1, use_container_width=True)
     st.markdown("**Utilité :** Ce graphique en secteur montre la part de chaque région dans la consommation totale.")
 
     # Carte interactive de la consommation d'énergie par région
@@ -233,13 +191,47 @@ if section == "Analyse Consommation électrique":
     fig_map.update_layout(mapbox_zoom=4, mapbox_center={"lat": 46.603354, "lon": 1.888334})  # Centrer sur la France
     st.plotly_chart(fig_map, use_container_width=True)
 
+    # # Visualisation 1 : Consommation par région
+    # df_conso_region = df.groupby(['REGION'])['ENERGIE_SOUTIREE'].sum().reset_index()
+    # df_sorted = df_conso_region.sort_values(by='ENERGIE_SOUTIREE', ascending=False)
+    
+    # fig1 = px.bar(df_sorted, x='REGION', y='ENERGIE_SOUTIREE', color='REGION',
+    #               color_discrete_map=region_colors,
+    #               title="Consommation d'énergie par région",
+    #               labels={'ENERGIE_SOUTIREE': 'Énergie soutirée (Wh)', 'REGION': 'Région'})
+    # st.plotly_chart(fig1, use_container_width=True)
+    # st.markdown("### Classement des régions par quantité totale d'énérgie consommée ")
+
+    # Visualisation 2 : Nombre de points de soutirage par région
+    df_points_region = df.groupby(['REGION'])['NB_POINTS_SOUTIRAGE'].mean().reset_index()
+    df_sorted_nb_points = df_points_region.sort_values(by='NB_POINTS_SOUTIRAGE', ascending=False)
+    fig5 = px.bar(df_sorted_nb_points, x='REGION', y='NB_POINTS_SOUTIRAGE', color='REGION',
+                  color_discrete_map=region_colors,
+                  title="Nombre de points de soutirage par région",
+                  labels={'NB_POINTS_SOUTIRAGE': 'Nombre de points de soutirage', 'REGION': 'Région'})
+    st.plotly_chart(fig5, use_container_width=True)
+    st.markdown("### Le nombre de points de soutirage est le nombre de contrats de soucription actifs dans la région. Les 3 Régions avec le plus de contrats actifs sont: l'Ile-de-France, l'Auvergne-Rhône-Alpes et l'Occitanie ")
+
+    # Visualisation 3 : Consommation moyenne par région
+    df['CONSO_MOYENNE'] = df['ENERGIE_SOUTIREE'] / df['NB_POINTS_SOUTIRAGE']
+    df_conso_moyenne = df.groupby(['REGION'])['CONSO_MOYENNE'].mean().reset_index()
+    df_conso_moyenne_sorted = df_conso_moyenne.sort_values(by='CONSO_MOYENNE', ascending=False)
+    fig6 = px.bar(df_conso_moyenne_sorted, x='REGION', y='CONSO_MOYENNE', color='REGION',
+                  color_discrete_map=region_colors,
+                  title="Consommation moyenne par rapport au nombre de points soutirage par région",
+                  labels={'CONSO_MOYENNE': 'Consommation moyenne (Wh par point de soutirage)', 'REGION': 'Région'})
+    fig6.update_xaxes(categoryorder='total descending')
+    st.plotly_chart(fig6, use_container_width=True)
+    st.markdown("### Les 3 régions les plus énergivores (consommation moyenne par point de soutirage les plus elevées): Centre-Val-de-Loire (région avec le moins de points de soutirage !), suivie de la Normandie et le Pays de la Loire. ")
+
+
     # Visualisation 6 : Séries temporelles de la consommation d'énergie
     fig21 = px.line(df, x='DATE', y='ENERGIE_SOUTIREE', color='REGION',
                     color_discrete_map=region_colors,
                     title="Évolution de la consommation d'énergie dans le temps:",
                     labels={'DATE': 'Date', 'ENERGIE_SOUTIREE': 'Énergie soutirée (Wh)', 'REGION': 'Région'})
     st.plotly_chart(fig21, use_container_width=True)
-    st.markdown("<body1> Une forme similaire est observable dans l’ensemble des régions, au fil des saisons, avec un pic l'hiver. </body1>")
+    st.markdown("### Une forme similaire est observable dans l’ensemble des régions, au fil des saisons, avec un pic l'hiver. ")
 
     # Visualisation 7 : Treemap de la consommation moyenne par région et saison
     df_conso_moyenne_saison = df.groupby(['REGION', 'SAISON'])['CONSO_MOYENNE'].mean().reset_index()
@@ -251,8 +243,8 @@ if section == "Analyse Consommation électrique":
                        title="Treemap: TOP 5 des régions qui consomment le plus en moyenne, par saison ",
                        color_continuous_scale='Viridis',
                        labels={'SAISON': 'Saison', 'REGION': 'Région', 'CONSO_MOYENNE': 'Consommation moyenne (Wh par point de soutirage)'})
-    st.plotly_chart(fig22, use_container_width=True)
-    st.markdown("<body1> L’été, les régions du sud sont dans le podium ! L'utilisation de climatiseurs, ainsi que l'affluence de vacanciers expliquent en partie cette consommaiton moyenne plus elevée. </body1>")
+    st.plotly_chart(fig24, use_container_width=True)
+    st.markdown("### L’été, les régions du sud sont dans le podium ! L'utilisation de climatiseurs, ainsi que l'affluence de vacanciers expliquent en partie cette consommaiton moyenne plus elevée. ")
 
 # ---------------------------------------------------------------------------
 # Section 2 : Visualisation consommation et météo
@@ -271,7 +263,7 @@ elif section == "Section 2 : Visualisation consommation et météo":
     #                    color_discrete_map=region_colors, title="Consommation vs Température moyenne",
     #                    labels={'Avg_Temperature': 'Température moyenne (°C)', 'ENERGIE_SOUTIREE': 'Énergie soutirée (Wh)', 'REGION': 'Région'})
     # st.plotly_chart(fig11, use_container_width=True)
-    # st.markdown("<body1> La température moyenne est la variable météo ayant le plus d'influence. Lorque la température augmente, la consommationd'électricité diminue. </body1>")
+    # st.markdown("### La température moyenne est la variable météo ayant le plus d'influence. Lorque la température augmente, la consommationd'électricité diminue. ")
 
     # # Visualisation 2 : Précipitations vs consommation
     # fig12 = px.scatter(df_all_regions, x='Avg_Précipitations_24h', y='ENERGIE_SOUTIREE', color='REGION',
@@ -285,7 +277,7 @@ elif section == "Section 2 : Visualisation consommation et météo":
                        color_discrete_map=region_colors, title="Consommationen en fonction du nombre d'heures d'ensoleillement",
                        labels={'DayLength_hours': 'Ensoleillement (heures)', 'ENERGIE_SOUTIREE': 'Énergie soutirée (Wh)', 'REGION': 'Région'})
     st.plotly_chart(fig13, use_container_width=True)
-    st.markdown("<body1> Ici l'influence de la variable ensoleillement est légère. En dessous de 10 heures de soeil, plus le nombre d'heures d'ensoleillement augmente plus la consommation d'électricité diminue. ensuite, cela a tendance à se tasser dans la plupart des régions. En effet, on tombe alors dans la saison d'été, où le besoin de chauffage est moindre ar les températures augmentent </body1>")
+    st.markdown("### Ici l'influence de la variable ensoleillement est légère. En dessous de 10 heures de soeil, plus le nombre d'heures d'ensoleillement augmente plus la consommation d'électricité diminue. ensuite, cela a tendance à se tasser dans la plupart des régions. En effet, on tombe alors dans la saison d'été, où le besoin de chauffage est moindre ar les températures augmentent ")
 
     # Visualisation 4 : Comparaison de la consommation pendant et hors vacances
     df_all_regions['Vacances_Status'] = df_all_regions['Vacances'].map({1: 'En Vacances', 0: 'Hors Vacances'})
@@ -296,7 +288,7 @@ elif section == "Section 2 : Visualisation consommation et météo":
                    title="Comparaison de la consommation d'énergie par région pendant et en dehors des vacances scolaires",
                    labels={'ENERGIE_SOUTIREE': 'Énergie soutirée (Wh)', 'REGION': 'Région', 'Vacances_Status': 'Statut des Vacances'})
     st.plotly_chart(fig20, use_container_width=True)
-    st.markdown("<body1> La consommation électrique diminue dans toutes les régions pendant les périodes de vacances. En effet, la consommation dans le foyers diminuent avec les départs en vacances, les établissement scolaires sont fermées, ainsi qu'une partie des entreprises, les transports publics réduisent leurs fréquences de passage, etc. </body1>")
+    st.markdown("### La consommation électrique diminue dans toutes les régions pendant les périodes de vacances. En effet, la consommation dans le foyers diminuent avec les départs en vacances, les établissement scolaires sont fermées, ainsi qu'une partie des entreprises, les transports publics réduisent leurs fréquences de passage, etc. ")
 
     
     # Visualisation 7 : Heatmap de corrélation interactive
@@ -318,7 +310,7 @@ elif section == "Section 2 : Visualisation consommation et météo":
     # Afficher la heatmap dans Streamlit
     st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown("<body1> La corrélation la plus forte est celle de la température moyenne, ce qui confirme que c'est bien la variable qui a le plus d'influence sur la quantité d'énergie consommée </body1>")
+    st.markdown("### La corrélation la plus forte est celle de la température moyenne, ce qui confirme que c'est bien la variable qui a le plus d'influence sur la quantité d'énergie consommée ")
 
     # # Visualisation 8 : Distribution de la consommation d'énergie par région
     # fig22 = px.violin(df_all_regions, x='REGION', y='ENERGIE_SOUTIREE', color='REGION',
@@ -333,7 +325,7 @@ elif section == "Section 2 : Visualisation consommation et météo":
                        color='REGION', title="Consommation en fonction de la Température moyenne",
                        labels={'Avg_Temperature': 'Température moyenne (°C)', 'ENERGIE_SOUTIREE': 'Énergie soutirée (Wh)', 'REGION': 'Région'})
     st.plotly_chart(fig25, use_container_width=True)
-    st.markdown("<body1> La température moyenne est la variable météo ayant le plus d'influence. Lorque la température augmente, la consommationd'électricité diminue. </body1>")
+    st.markdown("### La température moyenne est la variable météo ayant le plus d'influence. Lorque la température augmente, la consommationd'électricité diminue. ")
 
 # ---------------------------------------------------------------------------
 # Section 3 : Prédiction basée sur les données historiques avec Random Forest

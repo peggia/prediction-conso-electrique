@@ -18,7 +18,7 @@ def get_df_from_csv(fn):
     return pd.read_csv(fn, encoding='utf-8')
 
 # Configuration de la page Streamlit avec une disposition large et un titre personnalisé
-st.set_page_config(page_title="Prédiction électrique", layout="wide", page_icon= 'ressources/ENEDIS_Icone.png')
+st.set_page_config(page_title="Prédiction électrique", layout="wide", page_icon= 'ressources/ENEDIS_Icone.png') #'logo PY²MN.png')
 
 # Ajout de style CSS personnalisé pour correspondre au thème Enedis
 st.markdown("""
@@ -129,6 +129,12 @@ def sommaire_1():
     st.markdown("- [Consommation moyenne par région](#consommation-moyenne-par-région)")
     st.markdown("- [Évolution de la consommation d'électricité](#évolution-de-la-consommation-délectricité)")
     st.markdown("- [Consommation moyenne par région et saison](#consommation-moyenne-par-région-et-saison)")
+def sommaire_2():
+    st.subheader("Liste des Visuels",anchor="liste-des-visuels")
+    st.markdown("- [Influence des Vacances](#conso-vacances)")
+    st.markdown("- [Corrélation des variables](#correlation)")
+    st.markdown("- [Influence de la température](#temperature)")
+    st.markdown("- [Influence de la longueur des journées](#soleil)")
 
 if section == "Conso électrique":
     #st.header("Indicateurs de consommation électrique par région")
@@ -287,26 +293,42 @@ if section == "Conso électrique":
 # ---------------------------------------------------------------------------
 # Section 2 : Visualisation consommation et météo
 # ---------------------------------------------------------------------------
+
+
 elif section == "Conso électrique + météo + vacances":
-    st.header("Consommation électrique en fonction de la météo et les vacances")
-    
-    st.markdown("""Influence des périodes de vacances et de quelques variables météorologiques sur des relations la consommation d'électricité.""")
+
+    # st.header("Consommation électrique en fonction de la météo et les vacances") 
+    st.markdown("""Influence des périodes de vacances et de quelques variables météorologiques sur la consommation électrique.""")
+    sommaire_2()
     df_all_regions = get_df_from_csv('dfmlenedis.csv')
 
     # Visualisation 6 : Comparaison de la consommation pendant et hors vacances
+    st.subheader("Consommation d'électricité par région pendant et en dehors des vacances scolaires", anchor="conso-vacances")
+    st.markdown("""_La consommation électrique diminue dans toutes les régions pendant les périodes de vacances.
+                    En effet, la consommation dans le foyers diminuent avec les départs en vacances, les établissement scolaires sont fermées, 
+                    ainsi qu'une partie des entreprises, les transports publics réduisent leurs fréquences de passage, etc._
+                """)
     df_all_regions['Vacances_Status'] = df_all_regions['Vacances'].map({1: 'En Vacances', 0: 'Hors Vacances'})
     df_comparaison = df_all_regions.groupby(['REGION', 'Vacances_Status'])['ENERGIE_SOUTIREE'].sum().reset_index()
     fig6 = px.bar(df_comparaison, x='REGION', y='ENERGIE_SOUTIREE', color='Vacances_Status',
                    color_discrete_map={'En Vacances': '#88b949', 'Hors Vacances': 'orange'},
                    barmode='group',
-                   title="Comparaison de la consommation d'énergie par région pendant et en dehors des vacances scolaires",
+                   #title="Comparaison de la consommation d'électricité par région pendant et en dehors des vacances scolaires",
                    labels={'ENERGIE_SOUTIREE': 'Énergie soutirée (Wh)', 'REGION': 'Région', 'Vacances_Status': 'Statut des Vacances'})
     st.plotly_chart(fig6, use_container_width=True)
-    st.markdown(" La consommation électrique diminue dans toutes les régions pendant les périodes de vacances. En effet, la consommation dans le foyers diminuent avec les départs en vacances, les établissement scolaires sont fermées, ainsi qu'une partie des entreprises, les transports publics réduisent leurs fréquences de passage, etc. ")
-
+    
+    st.markdown(":arrow_up:[Revenir à la liste](#liste-des-visuels)")
+    st.write("")
+    st.write("")
     
     # Visualisation 7 : Heatmap de corrélation interactive
     # Calculer la matrice de corrélation
+    st.subheader("Corrélation des variables météo avec la consommation électrique", anchor="correlation")  
+    st.markdown("""_La corrélation la plus forte est celle de la température moyenne, 
+                    c'est donc  la variable qui a le plus d'influence sur la quantité d'électricité consommée_
+                """
+                )
+
     corr_matrix = df_all_regions[['ENERGIE_SOUTIREE', 'Avg_Temperature', 'Avg_Précipitations_24h','DayLength_hours']].corr()
 
     # Créer une heatmap interactive avec Plotly
@@ -317,31 +339,49 @@ elif section == "Conso électrique + météo + vacances":
                     text_auto=True)
 
     # Ajouter un titre et ajuster la mise en page
-    fig.update_layout(title='Corrélation des variables météo avec la consommation électrique',
+    fig.update_layout(
+                    #title='Corrélation des variables météo avec la consommation électrique',
                     xaxis_title='Variables',
                     yaxis_title='Variables')
 
     # Afficher la heatmap dans Streamlit
     st.plotly_chart(fig, use_container_width=True)
-
-    st.markdown(" La corrélation la plus forte est celle de la température moyenne, c'est donc  la variable qui a le plus d'influence sur la quantité d'électricité consommée ")
+    st.markdown(":arrow_up:[Revenir à la liste](#liste-des-visuels)")
+    st.write("")
+    st.write("")
 
     # Visualisation 8 : Température vs consommation avec régression linéaire
+    st.subheader("Corrélation des variables météo avec la consommation électrique", anchor="temperature")  
+    st.markdown("""_La température moyenne est la variable météo ayant le plus d'influence. 
+                Lorsque la température augmente, la consommation d'électricité diminue._"""
+                )
     fig8 = px.scatter(df_all_regions, x='Avg_Temperature', y='ENERGIE_SOUTIREE', trendline='ols',
                        color='REGION', title="Consommation en fonction de la Température moyenne",
                        labels={'Avg_Temperature': 'Température moyenne (°C)', 'ENERGIE_SOUTIREE': 'Énergie soutirée (Wh)', 'REGION': 'Région'})
     st.plotly_chart(fig8, use_container_width=True)
-    st.markdown("La température moyenne est la variable météo ayant le plus d'influence. Lorque la température augmente, la consommationd'électricité diminue. ")
+    st.markdown(" ")
+    st.markdown(":arrow_up:[Revenir à la liste](#liste-des-visuels)")
+    st.write("")
+    st.write("")
 
     # Visualisation 9 : Consommation
-    # color_sequence = list(region_colors.values())
+
+    st.subheader("Consommation en fonction de la longueur des journées", anchor="soleil")  
+    st.markdown("""_L'influence de la variable ensoleillement (longueur du jour) est plus nuancée. 
+                En dessous de 10 heures de soleil, plus le nombre d'heures d'ensoleillement augmente plus la consommation d'électricité diminue.
+                Ensuite, cela a tendance à se tasser dans la plupart des régions. En effet, on tombe alors dans la saison d'été, 
+                où le besoin de chauffage est moindre car les températures augmentent._
+                """)
+
     fig9 = px.scatter(df_all_regions, x='DayLength_hours', y='ENERGIE_SOUTIREE', color='REGION',trendline='ols',
-                       #color_discrete_map=region_colors, 
-                       color_discrete_sequence=color_sequence,
-                       title="Consommationen en fonction du nombre d'heures d'ensoleillement",
-                       labels={'DayLength_hours': 'Ensoleillement (heures)', 'ENERGIE_SOUTIREE': 'Énergie soutirée (Wh)', 'REGION': 'Région'})
+                       color_discrete_map=region_colors, 
+                       #color_discrete_sequence=color_sequence,
+                       #title="Consommation en en fonction du nombre d'heures d'ensoleillement",
+                       labels={'DayLength_hours': 'Longueur du jour (heures)', 'ENERGIE_SOUTIREE': 'Énergie soutirée (Wh)', 'REGION': 'Région'})
     st.plotly_chart(fig9, use_container_width=True)
-    st.markdown(" Ici l'influence de la variable ensoleillement est plus nuancée. En dessous de 10 heures de soeil, plus le nombre d'heures d'ensoleillement augmente plus la consommation d'électricité diminue. ensuite, cela a tendance à se tasser dans la plupart des régions. En effet, on tombe alors dans la saison d'été, où le besoin de chauffage est moindre ar les températures augmentent ")
+    st.markdown(":arrow_up:[Revenir à la liste](#liste-des-visuels)")
+    st.write("")
+    st.write("")
 
 # ---------------------------------------------------------------------------
 # Section 3 : Prédiction basée sur les données historiques avec Random Forest

@@ -209,8 +209,6 @@ if section == "Conso électrique":
 
     # Visualisation 1 : Répartition de la consommation par région (pie chart)
     with col2:
-        # st.subheader("Pourcentages de consommation par région", anchor="pourcentages-de-consommation-par-région")
-        # st.markdown("_Ce graphique montre le pourcentage de chaque région dans la consommation totale._")
         fig1 = px.pie(df_sorted_energie, names='REGION', color='REGION',values='ENERGIE_SOUTIREE',
                     color_discrete_map=region_colors,
                     #color_discrete_sequence=color_sequence,
@@ -250,8 +248,7 @@ if section == "Conso électrique":
 
     # Visualisation 4 : Consommation moyenne par région
     st.subheader("Consommation moyenne par région",anchor="consommation-moyenne-par-région")
-    st.markdown("""_Les 3 régions les plus énergivores (consommation moyenne par souscription) sont :  
-                    le Centre-Val de Loire (région avec le moins de points de soutirage !), 
+    st.markdown("""_Les 3 régions les plus énergivores (consommation moyenne par souscription) sont : le Centre-Val de Loire (région avec le moins de points de soutirage !), 
                     suivie de la Normandie et le Pays de la Loire._
                 """)
     df['CONSO_MOYENNE'] = df['ENERGIE_SOUTIREE'] / df['NB_POINTS_SOUTIRAGE']
@@ -300,10 +297,12 @@ elif section == "Conso électrique + météo + vacances":
     # st.header("Consommation électrique en fonction de la météo et les vacances") 
     st.markdown("""Influence des périodes de vacances et de quelques variables météorologiques sur la consommation électrique.""")
     sommaire_2()
+    st.write("")
+    st.write("")
     df_all_regions = get_df_from_csv('dfmlenedis.csv')
 
     # Visualisation 6 : Comparaison de la consommation pendant et hors vacances
-    st.subheader("Consommation d'électricité par région pendant et en dehors des vacances scolaires", anchor="conso-vacances")
+    st.subheader("Consommation par région pendant et en dehors des vacances", anchor="conso-vacances")
     st.markdown("""_La consommation électrique diminue dans toutes les régions pendant les périodes de vacances.
                     En effet, la consommation dans le foyers diminuent avec les départs en vacances, les établissement scolaires sont fermées, 
                     ainsi qu'une partie des entreprises, les transports publics réduisent leurs fréquences de passage, etc._
@@ -356,8 +355,10 @@ elif section == "Conso électrique + météo + vacances":
                 Lorsque la température augmente, la consommation d'électricité diminue._"""
                 )
     fig8 = px.scatter(df_all_regions, x='Avg_Temperature', y='ENERGIE_SOUTIREE', trendline='ols',
-                       color='REGION', title="Consommation en fonction de la Température moyenne",
-                       labels={'Avg_Temperature': 'Température moyenne (°C)', 'ENERGIE_SOUTIREE': 'Énergie soutirée (Wh)', 'REGION': 'Région'})
+                        color='REGION',
+                        color_discrete_map=region_colors, 
+                        #title="Consommation en fonction de la Température moyenne",
+                        labels={'Avg_Temperature': 'Température moyenne (°C)', 'ENERGIE_SOUTIREE': 'Énergie soutirée (Wh)', 'REGION': 'Région'})
     st.plotly_chart(fig8, use_container_width=True)
     st.markdown(" ")
     st.markdown(":arrow_up:[Revenir à la liste](#liste-des-visuels)")
@@ -374,8 +375,7 @@ elif section == "Conso électrique + météo + vacances":
                 """)
 
     fig9 = px.scatter(df_all_regions, x='DayLength_hours', y='ENERGIE_SOUTIREE', color='REGION',trendline='ols',
-                       color_discrete_map=region_colors, 
-                       #color_discrete_sequence=color_sequence,
+                      color_discrete_map=region_colors, 
                        #title="Consommation en en fonction du nombre d'heures d'ensoleillement",
                        labels={'DayLength_hours': 'Longueur du jour (heures)', 'ENERGIE_SOUTIREE': 'Énergie soutirée (Wh)', 'REGION': 'Région'})
     st.plotly_chart(fig9, use_container_width=True)

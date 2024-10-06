@@ -22,7 +22,7 @@ Depuis, je fais des modifs à ma sauce 🥰
 
 ## Scénario d'utilisation (Use Case)
 
-  ![ENEDIS-UseCase](https://github.com/user-attachments/assets/adb78f7a-7be1-4684-9cd8-b6567589368f)
+![ENEDIS-UseCase](https://github.com/user-attachments/assets/3c35af89-a520-4b8a-b10f-d158aac6f149)
 
 ## Application Streamlit
 Voici le lien vers l'application: https://prediction-conso-electrique-enedis.streamlit.app/

@@ -33,7 +33,13 @@ Voici le lien vers l'application: https://prediction-conso-electrique-enedis.str
 
 ## A propos du modèle Forêts Aléatoires (RandomForestRegressor)
 > "Les forêts aléatoires consistent à entraîner de multiples arbres de décision en parallèle et à moyenner leurs prédictions. Contraindre la profondeur des arbres correspond à une régularisation qui compense le sur-apprentissage"
-
+## Evaluation des modèles de Machine Learning
+- Type de problème: régression = prédiction d'une variable numérique 
+- Tâche: prédire la consommation electrique en Wh, en fonction de la temperature, la pluie, l'ensoleillement, les vacances
+- Modèles évalués:
+  - Deux modèles basés sur des arbres de décision:'Random Forest' et 'Gradient Boosting'.
+  - Un modèle basé sur une combinaison linéaire des variables d'entrée, avec des améliorations: 'Elastic Net'
+  - Un modèle basé sur la distance des plus proches voisins: 'K-Nearest Neighbors'
 ## Sources des données
 * Données conso électrique:
 

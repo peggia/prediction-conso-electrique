@@ -387,7 +387,7 @@ elif section == "Conso électrique + météo + vacances":
 # Section 3 : Prédiction basée sur les données historiques avec Random Forest
 # ---------------------------------------------------------------------------
 elif section == "Prédiction":
-    st.header("Prédiction de consommation électrique")
+    # st.header("Prédiction de consommation électrique")
 
     # Explication pour l'utilisateur
     st.markdown("""Cette section vous permet de prédire la consommation électrique pour une date donnée en utilisant un modèle d'apprentissage automatique de type Random Forest.""")
@@ -545,8 +545,7 @@ elif section == "Prédiction":
                'Centre-Val de Loire', 'Grand-Est', 'Hauts-de-France', 'Normandie',
                'Nouvelle Aquitaine', 'Occitanie', 'Pays de la Loire',
                "Provence-Alpes-Côte d'Azur", 'Île-de-France']
-    # selected_region = st.selectbox('Sélectionnez une région', regions)
-    # selected_date = st.date_input("Sélectionnez une date", min_value=datetime.date(2019, 1, 1), max_value=datetime.date(2039, 12, 31))
+
     # Vérifier si les valeurs sont déjà dans session_state, sinon les initialiser
     if 'selected_region' not in st.session_state:
         st.session_state.selected_region = regions[0]
@@ -592,7 +591,7 @@ elif section == "Prédiction":
 
         if prediction is not None:
             prediction_Mwh = prediction[0] / 1_000_000
-            st.success(f"Prédiction de consommation pour la région : {int(prediction_Mwh)} MWh pour la date {future_date.strftime('%d/%m/%Y')}.")
+            st.info(f"Prédiction de consommation pour la région : {int(prediction_Mwh)} MWh pour la date {future_date.strftime('%d/%m/%Y')}.")
 
             # Visualisation pour le mois
             visualize_month(df, model, scaler, future_date.month, future_date.year, selected_region)

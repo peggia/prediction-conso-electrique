@@ -17,15 +17,19 @@ Depuis, je fais des modifs à ma sauce 🥰
 ## Contenu du repository
 * Fichier csv avec les données mergées et agregées (dfmlenedeis.csv)
 * Fichier python avec le code de l'application streamlit (code2.py)
-* sous-répertoire "Analyse" avec le notebook utilisé pendant l'analyse exploratoire des données
-* sous-répertoire "ML" contenant le notebook utilisé pour l'evaluation des modèles, et les tests unitaires de prediction
-
+* sous-répertoire "analyse" avec le notebook utilisé pendant l'analyse exploratoire des données
+* sous-répertoire "machine-learning" contenant le notebook utilisé pour l'evaluation des modèles, et les tests unitaires de prediction
+* sous-répertoire "ressources" contenant les ressources graphiques (icones) de l'application
 ## Scénario d'utilisation (Use Case)
 
-![ENEDIS-UseCase](https://github.com/user-attachments/assets/3c35af89-a520-4b8a-b10f-d158aac6f149)
+![ENEDIS-UseCase](https://github.com/user-attachments/assets/e3ed0a09-bafa-4dd9-8f54-e2e2c88aed50)
+
 
 ## Application Streamlit
 Voici le lien vers l'application: https://prediction-conso-electrique-enedis.streamlit.app/
+
+## Analyse de la consommation en France
+![image](https://github.com/user-attachments/assets/0563a20a-ab3a-4dc7-ba07-27fbc38b77fe)
 
 ## A propos du modèle Forêts Aléatoires (RandomForestRegressor)
 > "Les forêts aléatoires consistent à entraîner de multiples arbres de décision en parallèle et à moyenner leurs prédictions. Contraindre la profondeur des arbres correspond à une régularisation qui compense le sur-apprentissage"

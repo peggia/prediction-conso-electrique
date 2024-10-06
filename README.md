@@ -22,14 +22,14 @@ Depuis, je fais des modifs à ma sauce 🥰
 * sous-répertoire "ressources" contenant les ressources graphiques (icones) de l'application
 ## Scénario d'utilisation (Use Case)
 
-![ENEDIS-UseCase](https://github.com/user-attachments/assets/e3ed0a09-bafa-4dd9-8f54-e2e2c88aed50)
+![ENEDIS-UseCase](https://github.com/user-attachments/assets/05ac820e-9237-4ab2-8905-672b6545ec24)
 
 
 ## Application Streamlit
 Voici le lien vers l'application: https://prediction-conso-electrique-enedis.streamlit.app/
 
 ## Analyse de la consommation en France
-![image](https://github.com/user-attachments/assets/0563a20a-ab3a-4dc7-ba07-27fbc38b77fe)
+![image](https://github.com/user-attachments/assets/4b2d3f20-40db-4cdc-9e0a-f32b6541a93b)
 
 ## A propos du modèle Forêts Aléatoires (RandomForestRegressor)
 > "Les forêts aléatoires consistent à entraîner de multiples arbres de décision en parallèle et à moyenner leurs prédictions. Contraindre la profondeur des arbres correspond à une régularisation qui compense le sur-apprentissage"

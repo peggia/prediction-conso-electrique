@@ -162,7 +162,7 @@ if section == "Conso électrique":
     
     # Carte interactive de la consommation d'énergie par région
     st.subheader("Les régions",anchor="les-régions")
-
+    st.markdown("_Taille des différentes régions de france métropolitaine en termes de nombre de souscripteurs (points de soutirage)_")
     # Coordonnées géographiques des régions
     geo_data = {
         'Hauts-de-France': [50.6292, 3.0573],
@@ -218,7 +218,7 @@ if section == "Conso électrique":
 
     # Visualisation 2 : Séries temporelles de la consommation d'énergie
     st.subheader("Évolution de la consommation d'électricité",anchor="évolution-de-la-consommation-délectricité")
-    st.markdown("_Une courbe assez similaire est observable dans l’ensemble des régions, au fil des saisons, avec un pic l'hiver._")
+    st.markdown("_Au fil des saisons, la consommation électrique suit une courbe assez similaire dans l’ensemble des régions, avec un pic l'hiver._")
     fig2 = px.line(df, x='DATE', y='ENERGIE_SOUTIREE', color='REGION',
                     color_discrete_map=region_colors,
                     #color_discrete_sequence=color_sequence,

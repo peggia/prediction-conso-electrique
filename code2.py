@@ -18,7 +18,7 @@ def get_df_from_csv(fn):
     return pd.read_csv(fn, encoding='utf-8')
 
 # Configuration de la page Streamlit avec une disposition large et un titre personnalisé
-st.set_page_config(page_title="Prédiction électrique", layout="wide", page_icon= 'ressources/ENEDIS_Icone.png') #'logo PY²MN.png')
+st.set_page_config(page_title="Prédiction électrique", layout="wide", page_icon= 'ressources/ENEDIS_Icone.png') )
 
 # Ajout de style CSS personnalisé pour correspondre au thème Enedis
 st.markdown("""
@@ -139,7 +139,7 @@ def sommaire_2():
 if section == "Conso électrique":
     #st.header("Indicateurs de consommation électrique par région")
     
-    st.markdown("Indicateurs de consommation électrique par région entre le 01/01/2022 et le 30/062024.")
+    st.markdown("Indicateurs de consommation électrique par région entre le 01/01/2022 et le 30/06/2024.")
 
     sommaire_1()
     # Charger les fichiers CSV

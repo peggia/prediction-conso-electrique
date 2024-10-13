@@ -18,7 +18,7 @@ def get_df_from_csv(fn):
     return pd.read_csv(fn, encoding='utf-8')
 
 # Configuration de la page Streamlit avec une disposition large et un titre personnalisé
-st.set_page_config(page_title="Prédiction électrique", layout="wide", page_icon= 'ressources/ENEDIS_Icone.png') )
+st.set_page_config(page_title="Prédiction électrique", layout="wide", page_icon= 'ressources/ENEDIS_Icone.png')
 
 # Ajout de style CSS personnalisé pour correspondre au thème Enedis
 st.markdown("""
